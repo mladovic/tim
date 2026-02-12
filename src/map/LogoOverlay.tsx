@@ -10,12 +10,12 @@ export function LogoOverlay({ isStoryPlaying }: LogoOverlayProps) {
       data-testid="logo-overlay"
       animate={{ opacity: isStoryPlaying ? 0 : 1 }}
       transition={{ duration: 0.3 }}
-      className={`absolute top-4 left-4 z-[1000] ${isStoryPlaying ? 'pointer-events-none' : ''}`}
+      className={isStoryPlaying ? 'pointer-events-none' : 'pointer-events-auto'}
     >
-      <h1 data-testid="logo-text" className="font-display text-2xl sm:text-3xl leading-tight text-body">
+      <h1 data-testid="logo-text" className="font-display text-2xl sm:text-3xl lg:text-4xl leading-tight text-body">
         The Dream <span className="text-primary">Tea</span>m
       </h1>
-      <p className="font-script text-sm text-body/70">feat. Marin</p>
+      <p className="font-script text-sm sm:text-base text-body/70">feat. Marin</p>
     </motion.div>
   );
 }

@@ -82,7 +82,14 @@ export function MapView() {
           ))}
       </MapContainer>
 
-      <LogoOverlay isStoryPlaying={isPlaying} />
+      <div className="absolute top-4 left-4 z-[1000] flex flex-col items-start gap-3 pointer-events-none sm:flex-row sm:items-start sm:justify-between sm:right-4">
+        <LogoOverlay isStoryPlaying={isPlaying} />
+        {hasMemories && (
+          <div className="pointer-events-auto">
+            <PlayStoryButton onStart={start} isStoryPlaying={isPlaying} />
+          </div>
+        )}
+      </div>
 
       {loading && (
         <div data-testid="map-loading" className="absolute inset-0 z-[1000] flex items-center justify-center">
@@ -105,12 +112,6 @@ export function MapView() {
           <div className="rounded-xl bg-white/90 px-6 py-4 shadow-lg backdrop-blur-sm">
             <p className="text-body/70 text-lg">No memories yet</p>
           </div>
-        </div>
-      )}
-
-      {hasMemories && (
-        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-[1000]">
-          <PlayStoryButton onStart={start} isStoryPlaying={isPlaying} />
         </div>
       )}
 

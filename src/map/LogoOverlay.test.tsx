@@ -58,12 +58,17 @@ describe('LogoOverlay', () => {
     expect(subtitle.className).toContain('text-sm');
   });
 
-  it('is absolutely positioned in the top-left area', () => {
+  it('has pointer-events-auto when not in Story Mode (positioned by parent wrapper)', () => {
     render(<LogoOverlay isStoryPlaying={false} />);
     const overlay = screen.getByTestId('logo-overlay');
-    expect(overlay.className).toContain('absolute');
-    expect(overlay.className).toContain('top-');
-    expect(overlay.className).toContain('left-');
+    expect(overlay.className).toContain('pointer-events-auto');
+  });
+
+  it('uses responsive typography scaling on the heading', () => {
+    render(<LogoOverlay isStoryPlaying={false} />);
+    const logo = screen.getByTestId('logo-text');
+    expect(logo.className).toContain('text-2xl');
+    expect(logo.className).toContain('lg:text-4xl');
   });
 
   it('fades out when Story Mode is playing', () => {

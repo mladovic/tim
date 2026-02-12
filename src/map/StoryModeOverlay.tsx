@@ -22,7 +22,7 @@ export function StoryModeOverlay({
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.3 }}
-          className="absolute inset-0 z-[1001] pointer-events-none flex flex-col items-center justify-start pt-4 lg:justify-end lg:pt-0 lg:pb-10 gap-3"
+          className="absolute inset-0 z-[1001] pointer-events-none flex flex-col items-center justify-start pt-4 sm:items-end sm:justify-end sm:pt-0 sm:pb-6 sm:pr-4 lg:pb-10 gap-3"
         >
           <p
             data-testid="story-progress"
