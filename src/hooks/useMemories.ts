@@ -72,7 +72,7 @@ export function useMemories(): UseMemoriesResult {
         setLoading(false);
       } catch (err) {
         if (controller.signal.aborted) return;
-        if (err instanceof SyntaxError) {
+        if (err instanceof SyntaxError || (err instanceof Error && err.message === 'parse')) {
           setError('Memory data is corrupted. Please try refreshing the page.');
         } else {
           setError('Failed to load memories. Please check your connection and try again.');
