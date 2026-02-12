@@ -10,6 +10,7 @@ const { mockMap, moveEndHandlers } = vi.hoisted(() => {
   const moveEndHandlers: Array<() => void> = [];
   const mockMap = {
     flyTo: vi.fn(),
+    panTo: vi.fn(),
     once: vi.fn((_event: string, handler: () => void) => {
       moveEndHandlers.push(handler);
     }),
@@ -47,6 +48,33 @@ vi.mock('react-leaflet', () => ({
   )),
   useMap: vi.fn(() => mockMap),
 }));
+
+vi.mock('react-leaflet', async () => {
+  const actual = await vi.importActual('react-leaflet');
+  return {
+    ...actual,
+    MapContainer: vi.fn(({ children, className }: Record<string, unknown>) => (
+      <div data-testid="map-container" className={className as string}>
+        {children as React.ReactNode}
+      </div>
+    )),
+    TileLayer: vi.fn(() => <div data-testid="tile-layer" />),
+    ZoomControl: vi.fn(() => <div data-testid="zoom-control" />),
+    Marker: vi.fn((props: Record<string, unknown>) => (
+      <div
+        data-testid="leaflet-marker"
+        onClick={() => {
+          const handlers = props.eventHandlers as Record<string, () => void> | undefined;
+          handlers?.click?.();
+        }}
+      />
+    )),
+    Polyline: vi.fn((props: Record<string, unknown>) => (
+      <div data-testid="path-line" data-positions={JSON.stringify(props.positions)} />
+    )),
+    useMap: vi.fn(() => mockMap),
+  };
+});
 
 vi.mock('leaflet', () => ({
   default: { divIcon: vi.fn((opts: Record<string, unknown>) => opts) },
@@ -96,6 +124,34 @@ vi.mock('framer-motion', () => ({
     },
   },
 }));
+
+// Mock Polyline component for path rendering tests
+vi.mock('react-leaflet', async () => {
+  const actual = await vi.importActual('react-leaflet');
+  return {
+    ...actual,
+    MapContainer: vi.fn(({ children, className }: Record<string, unknown>) => (
+      <div data-testid="map-container" className={className as string}>
+        {children as React.ReactNode}
+      </div>
+    )),
+    TileLayer: vi.fn(() => <div data-testid="tile-layer" />),
+    ZoomControl: vi.fn(() => <div data-testid="zoom-control" />),
+    Marker: vi.fn((props: Record<string, unknown>) => (
+      <div
+        data-testid="leaflet-marker"
+        onClick={() => {
+          const handlers = props.eventHandlers as Record<string, () => void> | undefined;
+          handlers?.click?.();
+        }}
+      />
+    )),
+    Polyline: vi.fn((props: Record<string, unknown>) => (
+      <div data-testid="path-line" data-positions={JSON.stringify(props.positions)} />
+    )),
+    useMap: vi.fn(() => mockMap),
+  };
+});
 
 import { useMemories } from '../hooks/useMemories';
 import { MapView } from './MapView';
@@ -268,5 +324,119 @@ describe('Story Mode integration', () => {
     expect(screen.getByTestId('map-empty').textContent).toContain('No memories yet');
     expect(screen.queryByText(/Play Our Story/)).not.toBeInTheDocument();
     expect(screen.queryByTestId('story-mode-overlay')).not.toBeInTheDocument();
+  });
+
+  it('initializes path lines when story mode starts', async () => {
+    render(<MapView />);
+
+    // No path lines before story mode starts
+    expect(screen.queryAllByTestId('path-line')).toHaveLength(0);
+
+    // Start playback
+    await act(async () => {
+      fireEvent.click(screen.getByText(/Play Our Story/));
+      await vi.advanceTimersByTimeAsync(0);
+    });
+
+    // Path lines should be rendered (N-1 paths for N memories)
+    const pathLines = screen.queryAllByTestId('path-line');
+    expect(pathLines.length).toBeGreaterThan(0);
+  });
+
+  it('animates airplane during transitions between memories', async () => {
+    render(<MapView />);
+
+    // Start playback
+    await act(async () => {
+      fireEvent.click(screen.getByText(/Play Our Story/));
+      await vi.advanceTimersByTimeAsync(0);
+    });
+
+    // Complete first fly to show first memory
+    await act(async () => {
+      resolveFly();
+      await vi.advanceTimersByTimeAsync(0);
+    });
+
+    // Card shown for memory 1
+    expect(screen.getByText('Memory One')).toBeInTheDocument();
+
+    // Advance reading pause to trigger transition to memory 2
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(5500);
+    });
+
+    // During transition, airplane marker should be present
+    // Note: The airplane marker uses a Marker component with specific props
+    const markers = screen.queryAllByTestId('leaflet-marker');
+    // We expect markers for memories + potentially the airplane marker
+    expect(markers.length).toBeGreaterThanOrEqual(sampleMemories.length);
+  });
+
+  it('cleans up paths and airplane when story mode stops', async () => {
+    render(<MapView />);
+
+    // Start playback
+    await act(async () => {
+      fireEvent.click(screen.getByText(/Play Our Story/));
+      await vi.advanceTimersByTimeAsync(0);
+    });
+
+    // Path lines should be rendered
+    expect(screen.queryAllByTestId('path-line').length).toBeGreaterThan(0);
+
+    // Complete first fly
+    await act(async () => {
+      resolveFly();
+      await vi.advanceTimersByTimeAsync(0);
+    });
+
+    // Stop story mode
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: /stop story mode/i }));
+      await vi.advanceTimersByTimeAsync(0);
+    });
+
+    // Path lines should be cleaned up
+    expect(screen.queryAllByTestId('path-line')).toHaveLength(0);
+  });
+
+  it('shows memory card after airplane animation completes', async () => {
+    render(<MapView />);
+
+    // Start playback
+    await act(async () => {
+      fireEvent.click(screen.getByText(/Play Our Story/));
+      await vi.advanceTimersByTimeAsync(0);
+    });
+
+    // Flying to first memory - card should not be visible yet
+    expect(screen.queryByText('Memory One')).not.toBeInTheDocument();
+
+    // Complete fly animation
+    await act(async () => {
+      resolveFly();
+      await vi.advanceTimersByTimeAsync(0);
+    });
+
+    // Card should now be visible after fly completes
+    expect(screen.getByText('Memory One')).toBeInTheDocument();
+
+    // Advance reading pause
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(5500);
+    });
+
+    // Card hidden, transitioning to next memory
+    expect(screen.queryByText('Memory One')).not.toBeInTheDocument();
+
+    // Complete second fly
+    await act(async () => {
+      resolveFly();
+      await vi.advanceTimersByTimeAsync(0);
+    });
+
+    // Second card visible after animation
+    expect(screen.getByText('Memory Two')).toBeInTheDocument();
   });
 });

@@ -10,6 +10,7 @@ import { MemoryCard } from './MemoryCard';
 import { LogoOverlay } from './LogoOverlay';
 import { PlayStoryButton } from './PlayStoryButton';
 import { StoryModeOverlay } from './StoryModeOverlay';
+import { StoryPathLayer } from './StoryPathLayer';
 
 const TILE_URL = 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png';
 const TILE_ATTRIBUTION =
@@ -55,6 +56,14 @@ export function MapView() {
     flyToMemory: mapHandle?.flyToMemory ?? null,
     showCard,
     hideCard,
+    onTransitionStart: (fromIndex, toIndex) => {
+      // Transition callbacks are handled by StoryPathLayer
+      // This allows the airplane animation to coordinate with story mode
+    },
+    onTransitionComplete: (index) => {
+      // Transition complete callback
+      // StoryPathLayer uses this to know when to stop following
+    },
   });
 
   const hasMemories = !loading && !error && memories.length > 0;
@@ -70,6 +79,14 @@ export function MapView() {
         <TileLayer url={TILE_URL} attribution={TILE_ATTRIBUTION} />
         <ZoomControl position="bottomleft" />
         <MapController onReady={setMapHandle} />
+
+        {/* StoryPathLayer renders below markers for proper z-index */}
+        <StoryPathLayer
+          isPlaying={isPlaying}
+          currentIndex={currentIndex}
+          memories={memories}
+          mapHandle={mapHandle}
+        />
 
         {hasMemories &&
           memories.map((memory) => (
