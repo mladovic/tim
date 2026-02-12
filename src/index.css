@@ -35,7 +35,12 @@ body {
   max-width: none !important;
 }
 
-/* 6. AuthGate dreamy gradient background */
+/* 6. Pink-tint filter for map tiles — romantic pastel aesthetic */
+.pink-tint-tiles .leaflet-tile-pane {
+  filter: hue-rotate(330deg) saturate(0.7) sepia(0.2) brightness(1.1);
+}
+
+/* 7. AuthGate dreamy gradient background */
 .auth-gate-bg {
   background:
     radial-gradient(ellipse at 20% 50%, rgba(251, 113, 133, 0.15) 0%, transparent 50%),
