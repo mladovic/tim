@@ -12,6 +12,8 @@ export interface UseStoryModeParams {
   hideCard: () => void;
   onPlaybackStart?: () => void;
   onPlaybackEnd?: () => void;
+  onTransitionStart?: (fromIndex: number, toIndex: number) => void;
+  onTransitionComplete?: (index: number) => void;
 }
 
 export interface UseStoryModeReturn {
@@ -52,7 +54,7 @@ export function useStoryMode(params: UseStoryModeParams): UseStoryModeReturn {
   const start = useCallback(() => {
     if (playingRef.current) return;
 
-    const { memories, flyToMemory, showCard, hideCard, onPlaybackStart, onPlaybackEnd } =
+    const { memories, flyToMemory, showCard, hideCard, onPlaybackStart, onPlaybackEnd, onTransitionStart, onTransitionComplete } =
       paramsRef.current;
 
     if (!flyToMemory || memories.length === 0) return;
@@ -71,6 +73,10 @@ export function useStoryMode(params: UseStoryModeParams): UseStoryModeReturn {
         const memory = memories[i];
         setCurrentIndex(i);
         setCurrentMemory(memory);
+
+        // Call onTransitionStart before flying to memory
+        const fromIndex = i > 0 ? i - 1 : -1;
+        onTransitionStart?.(fromIndex, i);
 
         // Fly to memory with timeout guard
         let flyTimedOut = false;
@@ -95,6 +101,9 @@ export function useStoryMode(params: UseStoryModeParams): UseStoryModeReturn {
         }
 
         if (isCancelled()) break;
+
+        // Call onTransitionComplete after flying to memory
+        onTransitionComplete?.(i);
 
         showCard(memory);
 

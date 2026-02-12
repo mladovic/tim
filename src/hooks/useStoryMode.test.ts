@@ -15,6 +15,8 @@ describe('useStoryMode', () => {
   let hideCard: ReturnType<typeof vi.fn>;
   let onPlaybackStart: ReturnType<typeof vi.fn>;
   let onPlaybackEnd: ReturnType<typeof vi.fn>;
+  let onTransitionStart: ReturnType<typeof vi.fn>;
+  let onTransitionComplete: ReturnType<typeof vi.fn>;
 
   beforeEach(() => {
     vi.useFakeTimers();
@@ -23,6 +25,8 @@ describe('useStoryMode', () => {
     hideCard = vi.fn();
     onPlaybackStart = vi.fn();
     onPlaybackEnd = vi.fn();
+    onTransitionStart = vi.fn();
+    onTransitionComplete = vi.fn();
   });
 
   afterEach(() => {
@@ -38,6 +42,8 @@ describe('useStoryMode', () => {
         hideCard,
         onPlaybackStart,
         onPlaybackEnd,
+        onTransitionStart,
+        onTransitionComplete,
         ...overrides,
       }),
     );
@@ -435,6 +441,148 @@ describe('useStoryMode', () => {
     it('does not throw on unmount when not playing', () => {
       const { unmount } = renderStoryMode();
       expect(() => unmount()).not.toThrow();
+    });
+  });
+
+  describe('transition callbacks', () => {
+    it('calls onTransitionStart before flyToMemory for first memory', async () => {
+      const { result } = renderStoryMode();
+      await startPlayback(result);
+
+      expect(onTransitionStart).toHaveBeenCalledTimes(1);
+      expect(onTransitionStart).toHaveBeenCalledWith(-1, 0);
+      expect(flyToMemory).toHaveBeenCalledTimes(1);
+    });
+
+    it('calls onTransitionComplete after flyToMemory completes', async () => {
+      const { result } = renderStoryMode();
+      await startPlayback(result);
+
+      expect(onTransitionComplete).toHaveBeenCalledTimes(1);
+      expect(onTransitionComplete).toHaveBeenCalledWith(0);
+      expect(flyToMemory).toHaveBeenCalledTimes(1);
+    });
+
+    it('calls onTransitionStart with correct fromIndex and toIndex for subsequent memories', async () => {
+      const { result } = renderStoryMode();
+      await startPlayback(result);
+
+      // First memory: fromIndex=-1, toIndex=0
+      expect(onTransitionStart).toHaveBeenNthCalledWith(1, -1, 0);
+
+      await advancePause();
+
+      // Second memory: fromIndex=0, toIndex=1
+      expect(onTransitionStart).toHaveBeenNthCalledWith(2, 0, 1);
+
+      await advancePause();
+
+      // Third memory: fromIndex=1, toIndex=2
+      expect(onTransitionStart).toHaveBeenNthCalledWith(3, 1, 2);
+    });
+
+    it('calls onTransitionComplete with correct index for each memory', async () => {
+      const { result } = renderStoryMode();
+      await startPlayback(result);
+
+      expect(onTransitionComplete).toHaveBeenNthCalledWith(1, 0);
+
+      await advancePause();
+      expect(onTransitionComplete).toHaveBeenNthCalledWith(2, 1);
+
+      await advancePause();
+      expect(onTransitionComplete).toHaveBeenNthCalledWith(3, 2);
+    });
+
+    it('calls transition callbacks in correct order relative to flyToMemory', async () => {
+      const callOrder: string[] = [];
+
+      const trackedFlyToMemory = vi.fn().mockImplementation(async () => {
+        callOrder.push('flyToMemory');
+      });
+
+      const trackedOnTransitionStart = vi.fn().mockImplementation(() => {
+        callOrder.push('onTransitionStart');
+      });
+
+      const trackedOnTransitionComplete = vi.fn().mockImplementation(() => {
+        callOrder.push('onTransitionComplete');
+      });
+
+      const { result } = renderStoryMode({
+        flyToMemory: trackedFlyToMemory,
+        onTransitionStart: trackedOnTransitionStart,
+        onTransitionComplete: trackedOnTransitionComplete,
+      });
+
+      await startPlayback(result);
+
+      expect(callOrder).toEqual(['onTransitionStart', 'flyToMemory', 'onTransitionComplete']);
+    });
+
+    it('calls onTransitionComplete before showCard', async () => {
+      const callOrder: string[] = [];
+
+      const trackedOnTransitionComplete = vi.fn().mockImplementation(() => {
+        callOrder.push('onTransitionComplete');
+      });
+
+      const trackedShowCard = vi.fn().mockImplementation(() => {
+        callOrder.push('showCard');
+      });
+
+      const { result } = renderStoryMode({
+        onTransitionComplete: trackedOnTransitionComplete,
+        showCard: trackedShowCard,
+      });
+
+      await startPlayback(result);
+
+      expect(callOrder).toEqual(['onTransitionComplete', 'showCard']);
+    });
+
+    it('does not call transition callbacks when callbacks are not provided', async () => {
+      const { result } = renderStoryMode({
+        onTransitionStart: undefined,
+        onTransitionComplete: undefined,
+      });
+
+      await startPlayback(result);
+
+      // Should not throw and should still work normally
+      expect(flyToMemory).toHaveBeenCalledTimes(1);
+      expect(showCard).toHaveBeenCalledTimes(1);
+    });
+
+    it('calls transition callbacks for all memories in sequence', async () => {
+      const { result } = renderStoryMode();
+      await startPlayback(result);
+
+      for (let i = 0; i < 2; i++) {
+        await advancePause();
+      }
+
+      expect(onTransitionStart).toHaveBeenCalledTimes(3);
+      expect(onTransitionComplete).toHaveBeenCalledTimes(3);
+    });
+
+    it('does not call transition callbacks after stop', async () => {
+      const { result } = renderStoryMode();
+      await startPlayback(result);
+
+      onTransitionStart.mockClear();
+      onTransitionComplete.mockClear();
+
+      await act(async () => {
+        result.current.stop();
+      });
+
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(5500);
+      });
+
+      expect(onTransitionStart).not.toHaveBeenCalled();
+      expect(onTransitionComplete).not.toHaveBeenCalled();
     });
   });
 });
