@@ -34,3 +34,12 @@ body {
 .leaflet-container img {
   max-width: none !important;
 }
+
+/* 6. AuthGate dreamy gradient background */
+.auth-gate-bg {
+  background:
+    radial-gradient(ellipse at 20% 50%, rgba(251, 113, 133, 0.15) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 20%, rgba(251, 113, 133, 0.12) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 80%, rgba(253, 164, 175, 0.10) 0%, transparent 50%),
+    linear-gradient(135deg, #fff1f2 0%, #fce7f3 30%, #fdf2f8 60%, #fff1f2 100%);
+}
