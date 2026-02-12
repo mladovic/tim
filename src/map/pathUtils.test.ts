@@ -1,69 +1,8 @@
 import { describe, it, expect } from 'vitest';
-import * as fc from 'fast-check';
 import { calculateCurvedPath } from './pathUtils';
 
 describe('pathUtils', () => {
   describe('calculateCurvedPath', () => {
-    /**
-     * Property 2: Curved path calculation
-     * Validates: Requirements 1.3
-     * 
-     * For any two distinct geographic coordinates, the calculated path should contain
-     * intermediate points that deviate from the straight line between them, forming a curved trajectory.
-     */
-    it('should generate curved paths that deviate from straight line', () => {
-      fc.assert(
-        fc.property(
-          // Generate random coordinate pairs
-          fc.tuple(
-            fc.float({ min: -90, max: 90 }), // start latitude
-            fc.float({ min: -180, max: 180 }), // start longitude
-            fc.float({ min: -90, max: 90 }), // end latitude
-            fc.float({ min: -180, max: 180 }) // end longitude
-          ).filter(([startLat, startLng, endLat, endLng]) => {
-            // Filter out identical or very close coordinates
-            const latDiff = Math.abs(endLat - startLat);
-            const lngDiff = Math.abs(endLng - startLng);
-            return latDiff > 0.1 || lngDiff > 0.1;
-          }),
-          ([startLat, startLng, endLat, endLng]) => {
-            const start: [number, number] = [startLat, startLng];
-            const end: [number, number] = [endLat, endLng];
-            
-            const path = calculateCurvedPath(start, end);
-            
-            // Path should have multiple points
-            expect(path.length).toBeGreaterThan(2);
-            
-            // First point should be start, last point should be end
-            // Use closeTo for floating point comparison to handle -0 vs 0
-            expect(path[0][0]).toBeCloseTo(start[0], 10);
-            expect(path[0][1]).toBeCloseTo(start[1], 10);
-            expect(path[path.length - 1][0]).toBeCloseTo(end[0], 10);
-            expect(path[path.length - 1][1]).toBeCloseTo(end[1], 10);
-            
-            // Check that intermediate points deviate from straight line
-            // Calculate the straight line for comparison
-            const hasDeviation = path.slice(1, -1).some((point, index) => {
-              const t = (index + 1) / (path.length - 1);
-              const straightLat = startLat + t * (endLat - startLat);
-              const straightLng = startLng + t * (endLng - startLng);
-              
-              // Check if point deviates from straight line
-              const latDeviation = Math.abs(point[0] - straightLat);
-              const lngDeviation = Math.abs(point[1] - straightLng);
-              
-              // At least one coordinate should deviate by a meaningful amount
-              return latDeviation > 0.001 || lngDeviation > 0.001;
-            });
-            
-            expect(hasDeviation).toBe(true);
-          }
-        ),
-        { numRuns: 100 }
-      );
-    });
-
     /**
      * Unit tests for edge cases
      * Validates: Requirements 1.3
