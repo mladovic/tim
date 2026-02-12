@@ -3,6 +3,8 @@ import { useMap } from 'react-leaflet';
 
 export interface MapControllerHandle {
   flyToMemory: (lat: number, lng: number, zoom: number, duration?: number) => Promise<void>;
+  followPosition: (lat: number, lng: number) => void;
+  stopFollowing: () => void;
 }
 
 interface MapControllerProps {
@@ -12,6 +14,7 @@ interface MapControllerProps {
 export function MapController({ onReady }: MapControllerProps) {
   const map = useMap();
   const animatingRef = useRef(false);
+  const followingRef = useRef(false);
   const onReadyRef = useRef(onReady);
   onReadyRef.current = onReady;
 
@@ -39,9 +42,23 @@ export function MapController({ onReady }: MapControllerProps) {
     [map],
   );
 
+  const followPosition = useCallback(
+    (lat: number, lng: number) => {
+      if (!followingRef.current) {
+        followingRef.current = true;
+      }
+      map.panTo([lat, lng], { animate: false });
+    },
+    [map],
+  );
+
+  const stopFollowing = useCallback(() => {
+    followingRef.current = false;
+  }, []);
+
   useEffect(() => {
-    onReadyRef.current({ flyToMemory });
-  }, [flyToMemory]);
+    onReadyRef.current({ flyToMemory, followPosition, stopFollowing });
+  }, [flyToMemory, followPosition, stopFollowing]);
 
   return null;
 }

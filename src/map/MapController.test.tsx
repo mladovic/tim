@@ -8,6 +8,7 @@ const mockMap = {
   flyTo: vi.fn(),
   once: vi.fn(),
   off: vi.fn(),
+  panTo: vi.fn(),
   getCenter: vi.fn(() => ({ lat: 0, lng: 0 })),
   getZoom: vi.fn(() => 3),
 };
@@ -44,6 +45,13 @@ describe('MapController', () => {
     renderController();
     expect(capturedHandle).not.toBeNull();
     expect(typeof capturedHandle!.flyToMemory).toBe('function');
+  });
+
+  it('calls onReady with a handle containing followPosition and stopFollowing', () => {
+    renderController();
+    expect(capturedHandle).not.toBeNull();
+    expect(typeof capturedHandle!.followPosition).toBe('function');
+    expect(typeof capturedHandle!.stopFollowing).toBe('function');
   });
 
   it('calls map.flyTo with target coordinates, zoom, and default 3s duration', () => {
@@ -98,5 +106,31 @@ describe('MapController', () => {
     moveEndHandler!();
     await promise;
     expect(resolveCount).toBe(1);
+  });
+
+  it('followPosition pans to correct coordinates', () => {
+    renderController();
+    capturedHandle!.followPosition(41.9028, 12.4964);
+    expect(mockMap.panTo).toHaveBeenCalledWith([41.9028, 12.4964], { animate: false });
+  });
+
+  it('followPosition pans immediately without animation', () => {
+    renderController();
+    capturedHandle!.followPosition(35.6762, 139.6503);
+    expect(mockMap.panTo).toHaveBeenCalledWith([35.6762, 139.6503], { animate: false });
+  });
+
+  it('stopFollowing can be called without errors', () => {
+    renderController();
+    expect(() => capturedHandle!.stopFollowing()).not.toThrow();
+  });
+
+  it('followPosition can be called multiple times', () => {
+    renderController();
+    capturedHandle!.followPosition(40.7128, -74.0060);
+    capturedHandle!.followPosition(51.5074, -0.1278);
+    expect(mockMap.panTo).toHaveBeenCalledTimes(2);
+    expect(mockMap.panTo).toHaveBeenNthCalledWith(1, [40.7128, -74.0060], { animate: false });
+    expect(mockMap.panTo).toHaveBeenNthCalledWith(2, [51.5074, -0.1278], { animate: false });
   });
 });
