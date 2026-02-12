@@ -1,6 +1,7 @@
 import { AnimatePresence, motion } from 'framer-motion';
 import { AuthProvider, useAuth } from './auth/AuthContext';
 import { AuthGate } from './auth/AuthGate';
+import { MapView } from './map/MapView';
 
 function AppContent() {
   const { isAuthenticated } = useAuth();
@@ -15,9 +16,7 @@ function AppContent() {
           exit={{ opacity: 0 }}
           transition={{ duration: 0.4 }}
         >
-          <div data-testid="map-view-placeholder" className="min-h-dvh flex items-center justify-center bg-surface text-body">
-            <p className="text-xl">Map loading...</p>
-          </div>
+          <MapView />
         </motion.div>
       ) : (
         <motion.div

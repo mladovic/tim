@@ -1,0 +1,102 @@
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { render } from '@testing-library/react';
+import type { MapControllerHandle } from './MapController';
+
+type EventHandler = () => void;
+
+const mockMap = {
+  flyTo: vi.fn(),
+  once: vi.fn(),
+  off: vi.fn(),
+  getCenter: vi.fn(() => ({ lat: 0, lng: 0 })),
+  getZoom: vi.fn(() => 3),
+};
+
+vi.mock('react-leaflet', () => ({
+  useMap: vi.fn(() => mockMap),
+}));
+
+import { MapController } from './MapController';
+
+describe('MapController', () => {
+  let capturedHandle: MapControllerHandle | null;
+  let moveEndHandler: EventHandler | null;
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    capturedHandle = null;
+    moveEndHandler = null;
+
+    mockMap.once.mockImplementation((event: string, handler: EventHandler) => {
+      if (event === 'moveend') moveEndHandler = handler;
+    });
+    mockMap.getCenter.mockReturnValue({ lat: 0, lng: 0 });
+    mockMap.getZoom.mockReturnValue(3);
+  });
+
+  function renderController() {
+    render(
+      <MapController onReady={(handle) => { capturedHandle = handle; }} />
+    );
+  }
+
+  it('calls onReady with a handle containing flyToMemory on mount', () => {
+    renderController();
+    expect(capturedHandle).not.toBeNull();
+    expect(typeof capturedHandle!.flyToMemory).toBe('function');
+  });
+
+  it('calls map.flyTo with target coordinates, zoom, and default 3s duration', () => {
+    renderController();
+    capturedHandle!.flyToMemory(48.8566, 2.3522, 14);
+    expect(mockMap.flyTo).toHaveBeenCalledWith([48.8566, 2.3522], 14, { duration: 3 });
+  });
+
+  it('uses a custom duration when provided', () => {
+    renderController();
+    capturedHandle!.flyToMemory(35, 135, 12, 5);
+    expect(mockMap.flyTo).toHaveBeenCalledWith([35, 135], 12, { duration: 5 });
+  });
+
+  it('returns a Promise that resolves when moveend fires', async () => {
+    renderController();
+    const promise = capturedHandle!.flyToMemory(48, 2, 14);
+    expect(moveEndHandler).not.toBeNull();
+    moveEndHandler!();
+    await expect(promise).resolves.toBeUndefined();
+  });
+
+  it('registers a moveend listener via map.once', () => {
+    renderController();
+    capturedHandle!.flyToMemory(48, 2, 14);
+    expect(mockMap.once).toHaveBeenCalledWith('moveend', expect.any(Function));
+  });
+
+  it('ignores subsequent flyToMemory calls while an animation is in progress', () => {
+    renderController();
+    capturedHandle!.flyToMemory(48, 2, 14);
+    capturedHandle!.flyToMemory(35, 135, 12);
+    expect(mockMap.flyTo).toHaveBeenCalledTimes(1);
+  });
+
+  it('allows a new flyToMemory call after the previous animation completes', async () => {
+    renderController();
+
+    const first = capturedHandle!.flyToMemory(48, 2, 14);
+    moveEndHandler!();
+    await first;
+
+    capturedHandle!.flyToMemory(35, 135, 12);
+    expect(mockMap.flyTo).toHaveBeenCalledTimes(2);
+  });
+
+  it('guards against multiple moveend fires resolving the Promise more than once', async () => {
+    renderController();
+    let resolveCount = 0;
+    const promise = capturedHandle!.flyToMemory(48, 2, 14).then(() => { resolveCount++; });
+    moveEndHandler!();
+    moveEndHandler!();
+    await promise;
+    expect(resolveCount).toBe(1);
+  });
+});
