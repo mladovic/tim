@@ -6,7 +6,7 @@
     "description": "The most magical week of our lives. Croissants at sunrise, wandering through art-filled streets, and falling in love with every cobblestone corner.",
     "lat": 48.8566,
     "lng": 2.3522,
-    "imageUrl": "/images/paris.jpg",
+    "imageUrl": "/images/trevi.jpg",
     "zoomLevel": 14
   },
   {
@@ -16,7 +16,7 @@
     "description": "Golden leaves falling around ancient temples. We shared matcha under a maple tree and promised to come back every autumn.",
     "lat": 35.0116,
     "lng": 135.7681,
-    "imageUrl": "/images/kyoto.jpg"
+    "imageUrl": "/images/trevi.jpg"
   },
   {
     "id": "new-york-nye",
@@ -25,7 +25,7 @@
     "description": "Counting down to the new year surrounded by a million lights. The city was loud but all I heard was your laugh.",
     "lat": 40.7128,
     "lng": -74.006,
-    "imageUrl": "/images/new-york.jpg",
+    "imageUrl": "/images/trevi.jpg",
     "zoomLevel": 13
   },
   {
