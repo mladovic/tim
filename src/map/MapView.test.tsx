@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { useMemories } from '../hooks/useMemories';
+import { useStoryMode } from '../hooks/useStoryMode';
 import type { Memory } from '../types';
 
 const { mockMarker, mockDivIcon } = vi.hoisted(() => ({
@@ -52,6 +53,14 @@ vi.mock('../hooks/useMemories', () => ({
   useMemories: vi.fn(),
 }));
 
+vi.mock('../hooks/useStoryMode', () => ({
+  useStoryMode: vi.fn(),
+}));
+
+vi.mock('./MapController', () => ({
+  MapController: vi.fn(() => <div data-testid="map-controller" />),
+}));
+
 vi.mock('framer-motion', () => ({
   AnimatePresence: ({ children }: { children: React.ReactNode }) => <>{children}</>,
   motion: {
@@ -89,6 +98,7 @@ function mockMatchMedia(matches: boolean) {
 }
 
 const mockUseMemories = vi.mocked(useMemories);
+const mockUseStoryMode = vi.mocked(useStoryMode);
 
 import { MapView } from './MapView';
 
@@ -103,6 +113,15 @@ describe('MapView', () => {
     vi.clearAllMocks();
     mockMatchMedia(false);
     mockUseMemories.mockReturnValue({ memories: [], loading: false, error: null });
+    mockUseStoryMode.mockReturnValue({
+      isPlaying: false,
+      currentMemory: null,
+      currentIndex: 0,
+      totalMemories: 0,
+      isEmpty: false,
+      start: vi.fn(),
+      stop: vi.fn(),
+    });
   });
 
   describe('map surface', () => {
@@ -301,6 +320,152 @@ describe('MapView', () => {
       expect(screen.getByText('Memory One')).toBeInTheDocument();
       await user.click(screen.getByRole('button', { name: /close/i }));
       expect(screen.queryByText('Memory One')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('story mode integration', () => {
+    const mockStart = vi.fn();
+    const mockStop = vi.fn();
+
+    beforeEach(() => {
+      mockUseMemories.mockReturnValue({ memories: sampleMemories, loading: false, error: null });
+      mockUseStoryMode.mockReturnValue({
+        isPlaying: false,
+        currentMemory: null,
+        currentIndex: 0,
+        totalMemories: 3,
+        isEmpty: false,
+        start: mockStart,
+        stop: mockStop,
+      });
+    });
+
+    it('renders MapController inside the map container', () => {
+      render(<MapView />);
+      const mapContainer = screen.getByTestId('map-container');
+      const mapController = screen.getByTestId('map-controller');
+      expect(mapContainer).toContainElement(mapController);
+    });
+
+    it('calls useStoryMode with the memories array', () => {
+      render(<MapView />);
+      expect(mockUseStoryMode).toHaveBeenCalledWith(
+        expect.objectContaining({
+          memories: sampleMemories,
+        }),
+      );
+    });
+
+    it('wires the start action to PlayStoryButton', async () => {
+      const user = userEvent.setup();
+      render(<MapView />);
+      await user.click(screen.getByText(/Play Our Story/));
+      expect(mockStart).toHaveBeenCalledOnce();
+    });
+
+    it('passes real isPlaying state to LogoOverlay instead of hardcoded false', () => {
+      mockUseStoryMode.mockReturnValue({
+        isPlaying: true,
+        currentMemory: sampleMemories[0],
+        currentIndex: 0,
+        totalMemories: 3,
+        isEmpty: false,
+        start: mockStart,
+        stop: mockStop,
+      });
+      render(<MapView />);
+      const logo = screen.getByTestId('logo-overlay');
+      expect(logo.className).toContain('pointer-events-none');
+    });
+
+    it('passes real isPlaying state to PlayStoryButton instead of hardcoded false', () => {
+      mockUseStoryMode.mockReturnValue({
+        isPlaying: true,
+        currentMemory: sampleMemories[0],
+        currentIndex: 0,
+        totalMemories: 3,
+        isEmpty: false,
+        start: mockStart,
+        stop: mockStop,
+      });
+      render(<MapView />);
+      const button = screen.getByText(/Play Our Story/).closest('button');
+      expect(button).toBeDisabled();
+    });
+
+    it('renders StoryModeOverlay with progress during playback', () => {
+      mockUseStoryMode.mockReturnValue({
+        isPlaying: true,
+        currentMemory: sampleMemories[1],
+        currentIndex: 1,
+        totalMemories: 3,
+        isEmpty: false,
+        start: mockStart,
+        stop: mockStop,
+      });
+      render(<MapView />);
+      expect(screen.getByTestId('story-mode-overlay')).toBeInTheDocument();
+      expect(screen.getByTestId('story-progress')).toHaveTextContent('Memory 2 of 3');
+    });
+
+    it('wires the stop action to StoryModeOverlay stop button', async () => {
+      mockUseStoryMode.mockReturnValue({
+        isPlaying: true,
+        currentMemory: sampleMemories[0],
+        currentIndex: 0,
+        totalMemories: 3,
+        isEmpty: false,
+        start: mockStart,
+        stop: mockStop,
+      });
+      const user = userEvent.setup();
+      render(<MapView />);
+      await user.click(screen.getByRole('button', { name: /stop story mode/i }));
+      expect(mockStop).toHaveBeenCalledOnce();
+    });
+
+    it('does not render StoryModeOverlay when not playing', () => {
+      render(<MapView />);
+      expect(screen.queryByTestId('story-mode-overlay')).not.toBeInTheDocument();
+    });
+
+    it('adds story-playing class to the map wrapper when playback is active', () => {
+      mockUseStoryMode.mockReturnValue({
+        isPlaying: true,
+        currentMemory: sampleMemories[0],
+        currentIndex: 0,
+        totalMemories: 3,
+        isEmpty: false,
+        start: mockStart,
+        stop: mockStop,
+      });
+      render(<MapView />);
+      const wrapper = screen.getByTestId('map-container').parentElement!;
+      expect(wrapper.className).toContain('story-playing');
+    });
+
+    it('does not add story-playing class when not playing', () => {
+      render(<MapView />);
+      const wrapper = screen.getByTestId('map-container').parentElement!;
+      expect(wrapper.className).not.toContain('story-playing');
+    });
+
+    it('suppresses marker clicks during playback so the cinematic sequence is not interrupted', async () => {
+      mockUseStoryMode.mockReturnValue({
+        isPlaying: true,
+        currentMemory: sampleMemories[0],
+        currentIndex: 0,
+        totalMemories: 3,
+        isEmpty: false,
+        start: mockStart,
+        stop: mockStop,
+      });
+      const user = userEvent.setup();
+      render(<MapView />);
+      const markers = screen.getAllByTestId('leaflet-marker');
+      await user.click(markers[0]);
+      // MemoryCard should NOT open — the card content should not appear
+      expect(screen.queryByRole('article')).not.toBeInTheDocument();
     });
   });
 });

@@ -2,6 +2,10 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
+const { mockMap } = vi.hoisted(() => ({
+  mockMap: { flyTo: vi.fn(), once: vi.fn() },
+}));
+
 vi.mock('react-leaflet', () => ({
   MapContainer: vi.fn(({ children, className }: Record<string, unknown>) => (
     <div data-testid="map-container" className={className as string}>
@@ -10,11 +14,13 @@ vi.mock('react-leaflet', () => ({
   )),
   TileLayer: vi.fn(() => <div data-testid="tile-layer" />),
   ZoomControl: vi.fn(() => <div data-testid="zoom-control" />),
+  useMap: vi.fn(() => mockMap),
 }));
 
 vi.mock('./hooks/useMemories', () => ({
   useMemories: vi.fn(() => ({ memories: [], loading: false, error: null })),
 }));
+
 
 import App from './App';
 

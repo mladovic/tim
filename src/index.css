@@ -40,7 +40,14 @@ body {
   filter: hue-rotate(330deg) saturate(0.7) sepia(0.2) brightness(1.1);
 }
 
-/* 7. AuthGate dreamy gradient background */
+/* 7. Story Mode — fade Leaflet zoom controls during cinematic playback */
+.story-playing .leaflet-control-zoom {
+  opacity: 0;
+  transition: opacity 0.3s;
+  pointer-events: none;
+}
+
+/* 8. AuthGate dreamy gradient background */
 .auth-gate-bg {
   background:
     radial-gradient(ellipse at 20% 50%, rgba(251, 113, 133, 0.15) 0%, transparent 50%),

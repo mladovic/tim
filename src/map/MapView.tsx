@@ -1,11 +1,15 @@
 import { useState, useCallback } from 'react';
 import { MapContainer, TileLayer, ZoomControl } from 'react-leaflet';
 import { useMemories } from '../hooks/useMemories';
+import { useStoryMode } from '../hooks/useStoryMode';
 import type { Memory } from '../types';
+import type { MapControllerHandle } from './MapController';
+import { MapController } from './MapController';
 import { HeartMarker } from './HeartMarker';
 import { MemoryCard } from './MemoryCard';
 import { LogoOverlay } from './LogoOverlay';
 import { PlayStoryButton } from './PlayStoryButton';
+import { StoryModeOverlay } from './StoryModeOverlay';
 
 const TILE_URL = 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png';
 const TILE_ATTRIBUTION =
@@ -18,6 +22,7 @@ export function MapView() {
   const { memories, loading, error } = useMemories();
   const [selectedMemory, setSelectedMemory] = useState<Memory | null>(null);
   const [isCardOpen, setIsCardOpen] = useState(false);
+  const [mapHandle, setMapHandle] = useState<MapControllerHandle | null>(null);
 
   const handleMarkerClick = useCallback((memory: Memory) => {
     setSelectedMemory(memory);
@@ -29,10 +34,33 @@ export function MapView() {
     setSelectedMemory(null);
   }, []);
 
+  const showCard = useCallback((memory: Memory) => {
+    setSelectedMemory(memory);
+    setIsCardOpen(true);
+  }, []);
+
+  const hideCard = useCallback(() => {
+    setIsCardOpen(false);
+    setSelectedMemory(null);
+  }, []);
+
+  const {
+    isPlaying,
+    currentIndex,
+    totalMemories,
+    start,
+    stop,
+  } = useStoryMode({
+    memories,
+    flyToMemory: mapHandle?.flyToMemory ?? null,
+    showCard,
+    hideCard,
+  });
+
   const hasMemories = !loading && !error && memories.length > 0;
 
   return (
-    <div className="relative h-dvh">
+    <div className={`relative h-dvh${isPlaying ? ' story-playing' : ''}`}>
       <MapContainer
         center={DEFAULT_CENTER}
         zoom={DEFAULT_ZOOM}
@@ -41,6 +69,7 @@ export function MapView() {
       >
         <TileLayer url={TILE_URL} attribution={TILE_ATTRIBUTION} />
         <ZoomControl position="bottomleft" />
+        <MapController onReady={setMapHandle} />
 
         {hasMemories &&
           memories.map((memory) => (
@@ -48,12 +77,12 @@ export function MapView() {
               key={memory.id}
               memory={memory}
               isActive={selectedMemory?.id === memory.id}
-              onClick={handleMarkerClick}
+              onClick={isPlaying ? () => {} : handleMarkerClick}
             />
           ))}
       </MapContainer>
 
-      <LogoOverlay isStoryPlaying={false} />
+      <LogoOverlay isStoryPlaying={isPlaying} />
 
       {loading && (
         <div data-testid="map-loading" className="absolute inset-0 z-[1000] flex items-center justify-center">
@@ -81,11 +110,18 @@ export function MapView() {
 
       {hasMemories && (
         <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-[1000]">
-          <PlayStoryButton onStart={() => {}} isStoryPlaying={false} />
+          <PlayStoryButton onStart={start} isStoryPlaying={isPlaying} />
         </div>
       )}
 
       <MemoryCard memory={selectedMemory} isOpen={isCardOpen} onClose={handleCardClose} />
+
+      <StoryModeOverlay
+        isPlaying={isPlaying}
+        currentIndex={currentIndex}
+        totalMemories={totalMemories}
+        onStop={stop}
+      />
     </div>
   );
 }
