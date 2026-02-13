@@ -13,7 +13,7 @@ export function LogoOverlay({ isStoryPlaying }: LogoOverlayProps) {
       className={isStoryPlaying ? 'pointer-events-none' : 'pointer-events-auto'}
     >
       <h1 data-testid="logo-text" className="font-display text-2xl sm:text-3xl lg:text-4xl leading-tight text-body">
-        Savršeni <span className="text-primary">T</span>i<span className="text-primary">M</span>
+        Savršeni <span className="text-primary">Tim</span>
       </h1>
       <p className="font-script text-sm sm:text-base text-body/70">feat. Tea & Marin</p>
     </motion.div>
