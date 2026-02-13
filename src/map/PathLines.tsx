@@ -1,17 +1,17 @@
 import { Polyline } from 'react-leaflet';
 import type { Memory } from '../types';
-import { calculateCurvedPath } from './pathUtils';
 
 export interface PathLinesProps {
   memories: Memory[];
   currentIndex: number;
+  isPlaying: boolean;
 }
 
 /**
- * Renders curved dashed path lines connecting consecutive memories in chronological order.
+ * Renders straight dashed path lines connecting consecutive memories in chronological order.
  * Highlights the current path segment being traveled during story mode transitions.
  */
-export function PathLines({ memories, currentIndex }: PathLinesProps) {
+export function PathLines({ memories, currentIndex, isPlaying }: PathLinesProps) {
   // Need at least 2 memories to create a path
   if (memories.length < 2) {
     return null;
@@ -23,12 +23,14 @@ export function PathLines({ memories, currentIndex }: PathLinesProps) {
     const from = memories[i];
     const to = memories[i + 1];
     
-    const path = calculateCurvedPath(
+    // Straight line path - just start and end coordinates
+    const path: [number, number][] = [
       [from.lat, from.lng],
       [to.lat, to.lng]
-    );
+    ];
 
-    const isCurrentSegment = i === currentIndex - 1;
+    // Highlight the current segment during story mode transitions
+    const isCurrentSegment = isPlaying && i === currentIndex - 1;
 
     pathSegments.push({
       key: `${from.id}-${to.id}`,

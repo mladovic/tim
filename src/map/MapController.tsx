@@ -5,6 +5,7 @@ export interface MapControllerHandle {
   flyToMemory: (lat: number, lng: number, zoom: number, duration?: number) => Promise<void>;
   followPosition: (lat: number, lng: number) => void;
   stopFollowing: () => void;
+  isFlyingTo: () => boolean;
 }
 
 interface MapControllerProps {
@@ -44,6 +45,10 @@ export function MapController({ onReady }: MapControllerProps) {
 
   const followPosition = useCallback(
     (lat: number, lng: number) => {
+      // Don't follow if a flyTo animation is in progress
+      if (animatingRef.current) {
+        return;
+      }
       if (!followingRef.current) {
         followingRef.current = true;
       }
@@ -56,9 +61,13 @@ export function MapController({ onReady }: MapControllerProps) {
     followingRef.current = false;
   }, []);
 
+  const isFlyingTo = useCallback(() => {
+    return animatingRef.current;
+  }, []);
+
   useEffect(() => {
-    onReadyRef.current({ flyToMemory, followPosition, stopFollowing });
-  }, [flyToMemory, followPosition, stopFollowing]);
+    onReadyRef.current({ flyToMemory, followPosition, stopFollowing, isFlyingTo });
+  }, [flyToMemory, followPosition, stopFollowing, isFlyingTo]);
 
   return null;
 }

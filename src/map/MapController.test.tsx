@@ -52,6 +52,7 @@ describe('MapController', () => {
     expect(capturedHandle).not.toBeNull();
     expect(typeof capturedHandle!.followPosition).toBe('function');
     expect(typeof capturedHandle!.stopFollowing).toBe('function');
+    expect(typeof capturedHandle!.isFlyingTo).toBe('function');
   });
 
   it('calls map.flyTo with target coordinates, zoom, and default 3s duration', () => {
@@ -132,5 +133,41 @@ describe('MapController', () => {
     expect(mockMap.panTo).toHaveBeenCalledTimes(2);
     expect(mockMap.panTo).toHaveBeenNthCalledWith(1, [40.7128, -74.0060], { animate: false });
     expect(mockMap.panTo).toHaveBeenNthCalledWith(2, [51.5074, -0.1278], { animate: false });
+  });
+
+  it('isFlyingTo returns false when no animation is in progress', () => {
+    renderController();
+    expect(capturedHandle!.isFlyingTo()).toBe(false);
+  });
+
+  it('isFlyingTo returns true during flyTo animation', () => {
+    renderController();
+    capturedHandle!.flyToMemory(48, 2, 14);
+    expect(capturedHandle!.isFlyingTo()).toBe(true);
+  });
+
+  it('isFlyingTo returns false after flyTo animation completes', async () => {
+    renderController();
+    const promise = capturedHandle!.flyToMemory(48, 2, 14);
+    expect(capturedHandle!.isFlyingTo()).toBe(true);
+    moveEndHandler!();
+    await promise;
+    expect(capturedHandle!.isFlyingTo()).toBe(false);
+  });
+
+  it('followPosition does not pan during flyTo animation', () => {
+    renderController();
+    capturedHandle!.flyToMemory(48, 2, 14);
+    capturedHandle!.followPosition(41.9028, 12.4964);
+    expect(mockMap.panTo).not.toHaveBeenCalled();
+  });
+
+  it('followPosition works after flyTo animation completes', async () => {
+    renderController();
+    const promise = capturedHandle!.flyToMemory(48, 2, 14);
+    moveEndHandler!();
+    await promise;
+    capturedHandle!.followPosition(41.9028, 12.4964);
+    expect(mockMap.panTo).toHaveBeenCalledWith([41.9028, 12.4964], { animate: false });
   });
 });

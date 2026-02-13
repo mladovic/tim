@@ -42,6 +42,9 @@ vi.mock('react-leaflet', () => ({
       />
     );
   },
+  Polyline: vi.fn((props: Record<string, unknown>) => (
+    <div data-testid="path-line" data-positions={JSON.stringify(props.positions)} />
+  )),
 }));
 
 vi.mock('leaflet', () => ({

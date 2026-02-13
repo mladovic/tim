@@ -25,7 +25,7 @@ describe('PathLines', () => {
     it('should render nothing with 0 memories', () => {
       const { container } = render(
         <MapContainer center={[0, 0]} zoom={2}>
-          <PathLines memories={[]} currentIndex={0} />
+          <PathLines memories={[]} currentIndex={0} isPlaying={false} />
         </MapContainer>
       );
 
@@ -38,7 +38,7 @@ describe('PathLines', () => {
 
       const { container } = render(
         <MapContainer center={[0, 0]} zoom={2}>
-          <PathLines memories={memories} currentIndex={0} />
+          <PathLines memories={memories} currentIndex={0} isPlaying={false} />
         </MapContainer>
       );
 
@@ -54,7 +54,7 @@ describe('PathLines', () => {
 
       const { container } = render(
         <MapContainer center={[0, 0]} zoom={2}>
-          <PathLines memories={memories} currentIndex={0} />
+          <PathLines memories={memories} currentIndex={0} isPlaying={false} />
         </MapContainer>
       );
 
@@ -71,7 +71,7 @@ describe('PathLines', () => {
 
       const { container } = render(
         <MapContainer center={[0, 0]} zoom={2}>
-          <PathLines memories={memories} currentIndex={0} />
+          <PathLines memories={memories} currentIndex={0} isPlaying={false} />
         </MapContainer>
       );
 
@@ -79,7 +79,7 @@ describe('PathLines', () => {
       expect(polylines.length).toBe(2);
     });
 
-    it('should highlight current path segment', () => {
+    it('should highlight current path segment during story mode', () => {
       const memories = [
         createMemory('1', 45.5, 12.3),
         createMemory('2', 46.0, 13.0),
@@ -88,19 +88,43 @@ describe('PathLines', () => {
 
       const { container } = render(
         <MapContainer center={[0, 0]} zoom={2}>
-          <PathLines memories={memories} currentIndex={1} />
+          <PathLines memories={memories} currentIndex={1} isPlaying={true} />
         </MapContainer>
       );
 
       const polylines = container.querySelectorAll('.leaflet-interactive');
       expect(polylines.length).toBe(2);
 
-      // First polyline (index 0) should be highlighted when currentIndex is 1
+      // First polyline (index 0) should be highlighted when currentIndex is 1 and story mode is playing
       const firstPath = polylines[0] as SVGPathElement;
       const strokeWidth = firstPath.getAttribute('stroke-width');
       
       // Highlighted path should have greater stroke width
       expect(parseFloat(strokeWidth || '0')).toBeGreaterThan(2);
+    });
+
+    it('should not highlight path segment when story mode is not playing', () => {
+      const memories = [
+        createMemory('1', 45.5, 12.3),
+        createMemory('2', 46.0, 13.0),
+        createMemory('3', 46.5, 13.5),
+      ];
+
+      const { container } = render(
+        <MapContainer center={[0, 0]} zoom={2}>
+          <PathLines memories={memories} currentIndex={1} isPlaying={false} />
+        </MapContainer>
+      );
+
+      const polylines = container.querySelectorAll('.leaflet-interactive');
+      expect(polylines.length).toBe(2);
+
+      // No path should be highlighted when story mode is not playing
+      const firstPath = polylines[0] as SVGPathElement;
+      const strokeWidth = firstPath.getAttribute('stroke-width');
+      
+      // Non-highlighted path should have normal stroke width
+      expect(parseFloat(strokeWidth || '0')).toBe(2);
     });
   });
 });

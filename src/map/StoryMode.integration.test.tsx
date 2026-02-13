@@ -235,11 +235,6 @@ describe('Story Mode integration', () => {
     expect(mockMap.flyTo).toHaveBeenCalledWith([45, 14], 14, { duration: 3 });
     expect(screen.getByTestId('story-progress')).toHaveTextContent('Memory 2 of 3');
 
-    // Wait for airplane animation to complete (2 seconds)
-    await act(async () => {
-      await vi.advanceTimersByTimeAsync(2000);
-    });
-
     // Complete fly 2
     await act(async () => {
       resolveFly();
@@ -258,11 +253,6 @@ describe('Story Mode integration', () => {
     expect(screen.queryByText('Memory Two')).not.toBeInTheDocument();
     expect(mockMap.flyTo).toHaveBeenCalledWith([40, -74], 12, { duration: 3 });
     expect(screen.getByTestId('story-progress')).toHaveTextContent('Memory 3 of 3');
-
-    // Wait for airplane animation to complete (2 seconds)
-    await act(async () => {
-      await vi.advanceTimersByTimeAsync(2000);
-    });
 
     // Complete fly 3
     await act(async () => {
@@ -353,37 +343,7 @@ describe('Story Mode integration', () => {
     expect(pathLinesDuringStory.length).toBeGreaterThan(0);
   });
 
-  it('animates airplane during transitions between memories', async () => {
-    render(<MapView />);
-
-    // Start playback
-    await act(async () => {
-      fireEvent.click(screen.getByText(/Play Our Story/));
-      await vi.advanceTimersByTimeAsync(0);
-    });
-
-    // Complete first fly to show first memory
-    await act(async () => {
-      resolveFly();
-      await vi.advanceTimersByTimeAsync(0);
-    });
-
-    // Card shown for memory 1
-    expect(screen.getByText('Memory One')).toBeInTheDocument();
-
-    // Advance reading pause to trigger transition to memory 2
-    await act(async () => {
-      await vi.advanceTimersByTimeAsync(5500);
-    });
-
-    // During transition, airplane marker should be present
-    // Note: The airplane marker uses a Marker component with specific props
-    const markers = screen.queryAllByTestId('leaflet-marker');
-    // We expect markers for memories + potentially the airplane marker
-    expect(markers.length).toBeGreaterThanOrEqual(sampleMemories.length);
-  });
-
-  it('keeps paths visible but removes airplane when story mode stops', async () => {
+  it('keeps paths visible when story mode stops', async () => {
     render(<MapView />);
 
     // Start playback
@@ -409,13 +369,9 @@ describe('Story Mode integration', () => {
 
     // Path lines should still be visible after story mode stops
     expect(screen.queryAllByTestId('path-line').length).toBeGreaterThan(0);
-
-    // Airplane marker should not be present (only memory markers remain)
-    const markers = screen.queryAllByTestId('leaflet-marker');
-    expect(markers.length).toBe(sampleMemories.length);
   });
 
-  it('shows memory card after airplane animation completes', async () => {
+  it('shows memory card during story mode', async () => {
     render(<MapView />);
 
     // Start playback
@@ -450,7 +406,7 @@ describe('Story Mode integration', () => {
       await vi.advanceTimersByTimeAsync(0);
     });
 
-    // Second card visible after animation
+    // Second card visible
     expect(screen.getByText('Memory Two')).toBeInTheDocument();
   });
 });
