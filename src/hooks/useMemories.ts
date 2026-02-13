@@ -11,6 +11,7 @@ interface RawMemory {
   lat: number;
   lng: number;
   imageUrl?: string;
+  videoUrl?: string;
   zoomLevel?: number;
 }
 
@@ -36,6 +37,7 @@ export function applyDefaults(raw: RawMemory): Memory {
     lat: raw.lat,
     lng: raw.lng,
     imageUrl: raw.imageUrl,
+    videoUrl: raw.videoUrl,
     zoomLevel: raw.zoomLevel ?? DEFAULT_ZOOM_LEVEL,
   };
 }

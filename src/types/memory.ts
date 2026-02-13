@@ -6,5 +6,6 @@ export interface Memory {
   lat: number;
   lng: number;
   imageUrl?: string;
+  videoUrl?: string;
   zoomLevel?: number;
 }

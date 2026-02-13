@@ -14,6 +14,7 @@ export interface UseStoryModeParams {
   onPlaybackEnd?: () => void;
   onTransitionStart?: (fromIndex: number, toIndex: number) => void;
   onTransitionComplete?: (index: number) => void;
+  getMemoryDuration?: (memory: Memory) => Promise<number>;
 }
 
 export interface UseStoryModeReturn {
@@ -54,7 +55,7 @@ export function useStoryMode(params: UseStoryModeParams): UseStoryModeReturn {
   const start = useCallback(() => {
     if (playingRef.current) return;
 
-    const { memories, flyToMemory, showCard, hideCard, onPlaybackStart, onPlaybackEnd, onTransitionStart, onTransitionComplete } =
+    const { memories, flyToMemory, showCard, hideCard, onPlaybackStart, onPlaybackEnd, onTransitionStart, onTransitionComplete, getMemoryDuration } =
       paramsRef.current;
 
     if (!flyToMemory || memories.length === 0) return;
@@ -107,8 +108,11 @@ export function useStoryMode(params: UseStoryModeParams): UseStoryModeReturn {
 
         showCard(memory);
 
+        // Get dynamic duration for this memory (video duration or default reading pause)
+        const duration = getMemoryDuration ? await getMemoryDuration(memory) : READING_PAUSE_MS;
+
         await new Promise<void>((resolve) => {
-          timeoutIdRef.current = setTimeout(resolve, READING_PAUSE_MS);
+          timeoutIdRef.current = setTimeout(resolve, duration);
         });
 
         if (isCancelled()) break;
