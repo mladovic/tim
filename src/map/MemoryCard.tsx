@@ -3,6 +3,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import type { PanInfo } from 'framer-motion';
 import type { Memory } from '../types';
 import { getMediaType, getMediaUrl } from '../utils/mediaType';
+import { useTranslation } from '../i18n/useTranslation';
 
 export interface MemoryCardProps {
   memory: Memory | null;
@@ -45,6 +46,7 @@ const SWIPE_OFFSET_THRESHOLD = 100;
 const SWIPE_VELOCITY_THRESHOLD = 500;
 
 export function MemoryCard({ memory, isOpen, onClose, onVideoEnd, isStoryMode = false }: MemoryCardProps) {
+  const { t, formatDate } = useTranslation();
   const isDesktop = useIsDesktop();
   const variant = isDesktop ? 'popup' : 'bottom-sheet';
   const variants = isDesktop ? popupVariants : bottomSheetVariants;
@@ -147,7 +149,7 @@ export function MemoryCard({ memory, isOpen, onClose, onVideoEnd, isStoryMode = 
             <div className={variant === 'popup' ? 'relative flex' : 'relative'}>
               <button
                 onClick={onClose}
-                aria-label="Close"
+                aria-label={t('memory.closeButton')}
                 className="absolute top-2 right-2 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-white/80 text-body hover:bg-white transition-colors"
               >
                 &times;
@@ -181,7 +183,7 @@ export function MemoryCard({ memory, isOpen, onClose, onVideoEnd, isStoryMode = 
                         }
                       >
                         <source src={mediaUrl} type="video/mp4" />
-                        Your browser does not support video playback.
+                        {t('memory.videoNotSupported')}
                       </video>
                       {isVideoLoading && (
                         <div className="absolute inset-0 flex items-center justify-center bg-black/20">
@@ -197,7 +199,7 @@ export function MemoryCard({ memory, isOpen, onClose, onVideoEnd, isStoryMode = 
                           : 'w-full h-[50vh] flex items-center justify-center bg-gray-100 text-gray-600 text-sm p-4 text-center'
                       }
                     >
-                      Unable to load video. The video file may be unavailable or in an unsupported format.
+                      {t('memory.videoLoadError')}
                     </div>
                   )}
                 </div>
@@ -218,7 +220,7 @@ export function MemoryCard({ memory, isOpen, onClose, onVideoEnd, isStoryMode = 
 
               <div className="p-4">
                 <h3 className="font-script text-2xl text-body">{memory.title}</h3>
-                <time className="text-sm text-body/60">{memory.date}</time>
+                <time className="text-sm text-body/60">{formatDate(new Date(memory.date))}</time>
                 <p className="mt-2 text-body font-sans text-sm leading-relaxed">
                   {memory.description}
                 </p>

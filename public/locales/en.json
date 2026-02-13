@@ -1,0 +1,39 @@
+{
+  "auth": {
+    "title": "The Dream Team",
+    "subtitle": "feat. Marin",
+    "question": "What is the name of our team?",
+    "placeholder": "Enter the secret phrase...",
+    "unlockButton": "Unlock",
+    "error": "Incorrect phrase. Please try again."
+  },
+  "map": {
+    "zoomIn": "Zoom In",
+    "zoomOut": "Zoom Out",
+    "resetView": "Reset View"
+  },
+  "memory": {
+    "closeButton": "Close",
+    "videoLoadError": "Unable to load video. The video file may be unavailable or in an unsupported format.",
+    "videoNotSupported": "Your browser does not support video playback.",
+    "loading": "Loading..."
+  },
+  "story": {
+    "playButton": "Play Our Story",
+    "stopButton": "Stop Story Mode",
+    "progressLabel": "Memory {current} of {total}",
+    "memoryOf": "Memory {current} of {total}"
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "close": "Close",
+    "switchLanguage": "Switch Language"
+  },
+  "language": {
+    "croatian": "Croatian",
+    "english": "English",
+    "currentLanguage": "Current language: {language}",
+    "switchTo": "Switch to {language}"
+  }
+}

@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { Memory } from '../types';
+import { I18nProvider } from '../i18n/I18nContext';
 
 const { capturedMotionProps } = vi.hoisted(() => ({
   capturedMotionProps: { current: {} as Record<string, unknown> },
@@ -74,6 +75,10 @@ function mockMatchMedia(matches: boolean) {
   });
 }
 
+function renderWithI18n(ui: React.ReactElement) {
+  return render(<I18nProvider>{ui}</I18nProvider>);
+}
+
 describe('MemoryCard', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -82,99 +87,100 @@ describe('MemoryCard', () => {
 
   describe('when closed', () => {
     it('does not render card content when isOpen is false', () => {
-      render(<MemoryCard memory={sampleMemory} isOpen={false} onClose={vi.fn()} />);
+      renderWithI18n(<MemoryCard memory={sampleMemory} isOpen={false} onClose={vi.fn()} />);
       expect(screen.queryByText('Our First Trip')).not.toBeInTheDocument();
     });
 
     it('does not render card content when memory is null', () => {
-      render(<MemoryCard memory={null} isOpen={true} onClose={vi.fn()} />);
+      renderWithI18n(<MemoryCard memory={null} isOpen={true} onClose={vi.fn()} />);
       expect(screen.queryByRole('article')).not.toBeInTheDocument();
     });
   });
 
   describe('when open with memory', () => {
     it('renders the memory title', () => {
-      render(<MemoryCard memory={sampleMemory} isOpen={true} onClose={vi.fn()} />);
+      renderWithI18n(<MemoryCard memory={sampleMemory} isOpen={true} onClose={vi.fn()} />);
       expect(screen.getByText('Our First Trip')).toBeInTheDocument();
     });
 
     it('renders the title in the script/handwritten font', () => {
-      render(<MemoryCard memory={sampleMemory} isOpen={true} onClose={vi.fn()} />);
+      renderWithI18n(<MemoryCard memory={sampleMemory} isOpen={true} onClose={vi.fn()} />);
       const title = screen.getByText('Our First Trip');
       expect(title.className).toContain('font-script');
     });
 
-    it('renders the memory date', () => {
-      render(<MemoryCard memory={sampleMemory} isOpen={true} onClose={vi.fn()} />);
-      expect(screen.getByText(/2023/)).toBeInTheDocument();
+    it('renders the memory date in Croatian format (DD.MM.YYYY)', () => {
+      renderWithI18n(<MemoryCard memory={sampleMemory} isOpen={true} onClose={vi.fn()} />);
+      // Date 2023-04-15 should be formatted as 15.04.2023 in Croatian
+      expect(screen.getByText('15.04.2023')).toBeInTheDocument();
     });
 
     it('renders the memory description', () => {
-      render(<MemoryCard memory={sampleMemory} isOpen={true} onClose={vi.fn()} />);
+      renderWithI18n(<MemoryCard memory={sampleMemory} isOpen={true} onClose={vi.fn()} />);
       expect(screen.getByText('The most magical week of our lives.')).toBeInTheDocument();
     });
 
     it('uses a cream/beige surface background', () => {
-      render(<MemoryCard memory={sampleMemory} isOpen={true} onClose={vi.fn()} />);
+      renderWithI18n(<MemoryCard memory={sampleMemory} isOpen={true} onClose={vi.fn()} />);
       const card = screen.getByRole('article');
       expect(card.className).toContain('bg-surface');
     });
 
     it('displays an X close button', () => {
-      render(<MemoryCard memory={sampleMemory} isOpen={true} onClose={vi.fn()} />);
+      renderWithI18n(<MemoryCard memory={sampleMemory} isOpen={true} onClose={vi.fn()} />);
       expect(screen.getByRole('button', { name: /close/i })).toBeInTheDocument();
     });
 
     it('invokes onClose when the X button is clicked', async () => {
       const onClose = vi.fn();
       const user = userEvent.setup();
-      render(<MemoryCard memory={sampleMemory} isOpen={true} onClose={onClose} />);
+      renderWithI18n(<MemoryCard memory={sampleMemory} isOpen={true} onClose={onClose} />);
       await user.click(screen.getByRole('button', { name: /close/i }));
       expect(onClose).toHaveBeenCalledOnce();
     });
 
     it('wraps the card with AnimatePresence', () => {
-      render(<MemoryCard memory={sampleMemory} isOpen={true} onClose={vi.fn()} />);
+      renderWithI18n(<MemoryCard memory={sampleMemory} isOpen={true} onClose={vi.fn()} />);
       expect(screen.getByTestId('animate-presence')).toBeInTheDocument();
     });
   });
 
   describe('photo rendering', () => {
     it('renders the photo when memory has an imageUrl', () => {
-      render(<MemoryCard memory={sampleMemory} isOpen={true} onClose={vi.fn()} />);
+      renderWithI18n(<MemoryCard memory={sampleMemory} isOpen={true} onClose={vi.fn()} />);
       const img = screen.getByRole('img');
       expect(img).toBeInTheDocument();
       expect(img).toHaveAttribute('src', '/images/paris.jpg');
     });
 
     it('sets loading="lazy" on the photo for deferred loading', () => {
-      render(<MemoryCard memory={sampleMemory} isOpen={true} onClose={vi.fn()} />);
+      renderWithI18n(<MemoryCard memory={sampleMemory} isOpen={true} onClose={vi.fn()} />);
       const img = screen.getByRole('img');
       expect(img).toHaveAttribute('loading', 'lazy');
     });
 
     it('does not render an image when memory has no imageUrl', () => {
-      render(<MemoryCard memory={memoryWithoutImage} isOpen={true} onClose={vi.fn()} />);
+      renderWithI18n(<MemoryCard memory={memoryWithoutImage} isOpen={true} onClose={vi.fn()} />);
       expect(screen.queryByRole('img')).not.toBeInTheDocument();
     });
   });
 
   describe('click-outside dismissal', () => {
     it('renders a backdrop overlay when the card is open', () => {
-      render(<MemoryCard memory={sampleMemory} isOpen={true} onClose={vi.fn()} />);
+      renderWithI18n(<MemoryCard memory={sampleMemory} isOpen={true} onClose={vi.fn()} />);
       expect(screen.getByTestId('memory-card-backdrop')).toBeInTheDocument();
     });
 
     it('invokes onClose when the backdrop is clicked', async () => {
       const onClose = vi.fn();
       const user = userEvent.setup();
-      render(<MemoryCard memory={sampleMemory} isOpen={true} onClose={onClose} />);
+      renderWithI18n(<MemoryCard memory={sampleMemory} isOpen={true} onClose={onClose} />);
       await user.click(screen.getByTestId('memory-card-backdrop'));
       expect(onClose).toHaveBeenCalledOnce();
     });
 
     it('does not render a backdrop when the card is closed', () => {
-      render(<MemoryCard memory={sampleMemory} isOpen={false} onClose={vi.fn()} />);
+      renderWithI18n(<MemoryCard memory={sampleMemory} isOpen={false} onClose={vi.fn()} />);
       expect(screen.queryByTestId('memory-card-backdrop')).not.toBeInTheDocument();
     });
   });
@@ -182,7 +188,7 @@ describe('MemoryCard', () => {
   describe('responsive variants', () => {
     it('renders a desktop popup layout when viewport is above 1024px', () => {
       mockMatchMedia(true);
-      render(<MemoryCard memory={sampleMemory} isOpen={true} onClose={vi.fn()} />);
+      renderWithI18n(<MemoryCard memory={sampleMemory} isOpen={true} onClose={vi.fn()} />);
       const card = screen.getByRole('article');
       expect(card.className).toContain('popup');
       expect(card.className).not.toContain('bottom-sheet');
@@ -190,7 +196,7 @@ describe('MemoryCard', () => {
 
     it('positions the desktop popup as an absolute overlay centered on the map', () => {
       mockMatchMedia(true);
-      render(<MemoryCard memory={sampleMemory} isOpen={true} onClose={vi.fn()} />);
+      renderWithI18n(<MemoryCard memory={sampleMemory} isOpen={true} onClose={vi.fn()} />);
       const card = screen.getByRole('article');
       expect(card.className).toContain('absolute');
       expect(card.className).toContain('top-1/2');
@@ -199,7 +205,7 @@ describe('MemoryCard', () => {
 
     it('renders a mobile bottom sheet layout when viewport is below 1024px', () => {
       mockMatchMedia(false);
-      render(<MemoryCard memory={sampleMemory} isOpen={true} onClose={vi.fn()} />);
+      renderWithI18n(<MemoryCard memory={sampleMemory} isOpen={true} onClose={vi.fn()} />);
       const card = screen.getByRole('article');
       expect(card.className).toContain('bottom-sheet');
       expect(card.className).not.toContain('popup');
@@ -209,27 +215,27 @@ describe('MemoryCard', () => {
   describe('swipe-to-dismiss', () => {
     it('enables vertical drag on the mobile bottom sheet', () => {
       mockMatchMedia(false);
-      render(<MemoryCard memory={sampleMemory} isOpen={true} onClose={vi.fn()} />);
+      renderWithI18n(<MemoryCard memory={sampleMemory} isOpen={true} onClose={vi.fn()} />);
       expect(capturedMotionProps.current.drag).toBe('y');
     });
 
     it('constrains drag to downward direction only', () => {
       mockMatchMedia(false);
-      render(<MemoryCard memory={sampleMemory} isOpen={true} onClose={vi.fn()} />);
+      renderWithI18n(<MemoryCard memory={sampleMemory} isOpen={true} onClose={vi.fn()} />);
       const constraints = capturedMotionProps.current.dragConstraints as { top: number };
       expect(constraints.top).toBe(0);
     });
 
     it('does not enable drag on the desktop popup variant', () => {
       mockMatchMedia(true);
-      render(<MemoryCard memory={sampleMemory} isOpen={true} onClose={vi.fn()} />);
+      renderWithI18n(<MemoryCard memory={sampleMemory} isOpen={true} onClose={vi.fn()} />);
       expect(capturedMotionProps.current.drag).toBeFalsy();
     });
 
     it('calls onClose when swipe exceeds the dismissal threshold', () => {
       mockMatchMedia(false);
       const onClose = vi.fn();
-      render(<MemoryCard memory={sampleMemory} isOpen={true} onClose={onClose} />);
+      renderWithI18n(<MemoryCard memory={sampleMemory} isOpen={true} onClose={onClose} />);
       const onDragEnd = capturedMotionProps.current.onDragEnd as (
         event: unknown,
         info: { offset: { y: number }; velocity: { y: number } },
@@ -242,7 +248,7 @@ describe('MemoryCard', () => {
     it('calls onClose when swipe velocity exceeds the threshold', () => {
       mockMatchMedia(false);
       const onClose = vi.fn();
-      render(<MemoryCard memory={sampleMemory} isOpen={true} onClose={onClose} />);
+      renderWithI18n(<MemoryCard memory={sampleMemory} isOpen={true} onClose={onClose} />);
       const onDragEnd = capturedMotionProps.current.onDragEnd as (
         event: unknown,
         info: { offset: { y: number }; velocity: { y: number } },
@@ -254,7 +260,7 @@ describe('MemoryCard', () => {
     it('does not call onClose when swipe is below the threshold', () => {
       mockMatchMedia(false);
       const onClose = vi.fn();
-      render(<MemoryCard memory={sampleMemory} isOpen={true} onClose={onClose} />);
+      renderWithI18n(<MemoryCard memory={sampleMemory} isOpen={true} onClose={onClose} />);
       const onDragEnd = capturedMotionProps.current.onDragEnd as (
         event: unknown,
         info: { offset: { y: number }; velocity: { y: number } },

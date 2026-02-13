@@ -2,6 +2,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { AuthProvider, useAuth } from './auth/AuthContext';
 import { AuthGate } from './auth/AuthGate';
 import { MapView } from './map/MapView';
+import { I18nProvider } from './i18n/I18nContext';
 
 function AppContent() {
   const { isAuthenticated } = useAuth();
@@ -35,9 +36,11 @@ function AppContent() {
 
 function App() {
   return (
-    <AuthProvider>
-      <AppContent />
-    </AuthProvider>
+    <I18nProvider>
+      <AuthProvider>
+        <AppContent />
+      </AuthProvider>
+    </I18nProvider>
   );
 }
 

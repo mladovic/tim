@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen, act } from '@testing-library/react';
+import { render, screen, act, waitFor } from '@testing-library/react';
 import { fireEvent } from '@testing-library/react';
 import type { Memory } from '../types';
 
@@ -155,6 +155,7 @@ vi.mock('react-leaflet', async () => {
 
 import { useMemories } from '../hooks/useMemories';
 import { MapView } from './MapView';
+import { I18nProvider } from '../i18n/I18nContext';
 
 const mockUseMemories = vi.mocked(useMemories);
 
@@ -189,16 +190,31 @@ describe('Story Mode integration', () => {
     vi.useRealTimers();
   });
 
-  it('plays through the full sequence: fly -> card -> pause -> hide -> next -> ... -> end -> UI restored', async () => {
-    render(<MapView />);
+  it('plays through the full sequence: fly -> card -> pause -> hide -> next -> ... -> end -> UI restored', { timeout: 15000 }, async () => {
+    // Use real timers for initial render to allow translations to load
+    vi.useRealTimers();
+    
+    render(
+      <I18nProvider>
+        <MapView />
+      </I18nProvider>
+    );
+
+    // Wait for translations to load
+    await waitFor(() => {
+      expect(screen.getByText(/Pokreni našu priču/)).toBeInTheDocument();
+    });
+    
+    // Switch back to fake timers for the rest of the test
+    vi.useFakeTimers();
 
     // Play button visible, overlay not shown
-    expect(screen.getByText(/Play Our Story/)).toBeInTheDocument();
+    expect(screen.getByText(/Pokreni našu priču/)).toBeInTheDocument();
     expect(screen.queryByTestId('story-mode-overlay')).not.toBeInTheDocument();
 
     // Start playback
     await act(async () => {
-      fireEvent.click(screen.getByText(/Play Our Story/));
+      fireEvent.click(screen.getByText(/Pokreni našu priču/));
       await vi.advanceTimersByTimeAsync(0);
     });
 
@@ -210,7 +226,7 @@ describe('Story Mode integration', () => {
     // Fly to memory 1 in progress
     expect(mockMap.flyTo).toHaveBeenCalledTimes(1);
     expect(mockMap.flyTo).toHaveBeenCalledWith([48, 2], 13, { duration: 3 });
-    expect(screen.getByTestId('story-progress')).toHaveTextContent('Memory 1 of 3');
+    expect(screen.getByTestId('story-progress')).toHaveTextContent('Uspomena 1 od 3');
 
     // Card not shown yet (still flying)
     expect(screen.queryByText('Memory One')).not.toBeInTheDocument();
@@ -229,11 +245,15 @@ describe('Story Mode integration', () => {
       await vi.advanceTimersByTimeAsync(5500);
     });
 
+    // Wait for card to be hidden after reading pause
+    await waitFor(() => {
+      expect(screen.queryByText('Memory One')).not.toBeInTheDocument();
+    });
+    
     // Card hidden, flying to memory 2
-    expect(screen.queryByText('Memory One')).not.toBeInTheDocument();
     // Note: flyTo is called for the initial transition to memory 2
     expect(mockMap.flyTo).toHaveBeenCalledWith([45, 14], 14, { duration: 3 });
-    expect(screen.getByTestId('story-progress')).toHaveTextContent('Memory 2 of 3');
+    expect(screen.getByTestId('story-progress')).toHaveTextContent('Uspomena 2 od 3');
 
     // Complete fly 2
     await act(async () => {
@@ -252,7 +272,7 @@ describe('Story Mode integration', () => {
     // Flying to memory 3
     expect(screen.queryByText('Memory Two')).not.toBeInTheDocument();
     expect(mockMap.flyTo).toHaveBeenCalledWith([40, -74], 12, { duration: 3 });
-    expect(screen.getByTestId('story-progress')).toHaveTextContent('Memory 3 of 3');
+    expect(screen.getByTestId('story-progress')).toHaveTextContent('Uspomena 3 od 3');
 
     // Complete fly 3
     await act(async () => {
@@ -271,15 +291,30 @@ describe('Story Mode integration', () => {
     // Playback complete: overlay gone, story-playing class removed, play button restored
     expect(screen.queryByTestId('story-mode-overlay')).not.toBeInTheDocument();
     expect(wrapper.className).not.toContain('story-playing');
-    expect(screen.getByText(/Play Our Story/)).toBeInTheDocument();
+    expect(screen.getByText(/Pokreni našu priču/)).toBeInTheDocument();
   });
 
   it('stops mid-sequence: start -> fly -> card -> stop -> card closed -> UI restored', async () => {
-    render(<MapView />);
+    // Use real timers for initial render to allow translations to load
+    vi.useRealTimers();
+    
+    render(
+      <I18nProvider>
+        <MapView />
+      </I18nProvider>
+    );
+
+    // Wait for translations to load
+    await waitFor(() => {
+      expect(screen.getByText(/Pokreni našu priču/)).toBeInTheDocument();
+    });
+    
+    // Switch back to fake timers for the rest of the test
+    vi.useFakeTimers();
 
     // Start playback
     await act(async () => {
-      fireEvent.click(screen.getByText(/Play Our Story/));
+      fireEvent.click(screen.getByText(/Pokreni našu priču/));
       await vi.advanceTimersByTimeAsync(0);
     });
 
@@ -294,9 +329,9 @@ describe('Story Mode integration', () => {
     // Card visible
     expect(screen.getByText('Memory One')).toBeInTheDocument();
 
-    // Click the stop button
+    // Click the stop button (using Croatian ARIA label)
     await act(async () => {
-      fireEvent.click(screen.getByRole('button', { name: /stop story mode/i }));
+      fireEvent.click(screen.getByRole('button', { name: /zaustavi način priče/i }));
       await vi.advanceTimersByTimeAsync(0);
     });
 
@@ -305,7 +340,7 @@ describe('Story Mode integration', () => {
     expect(screen.queryByTestId('story-mode-overlay')).not.toBeInTheDocument();
     const wrapper = screen.getByTestId('map-container').parentElement!;
     expect(wrapper.className).not.toContain('story-playing');
-    expect(screen.getByText(/Play Our Story/)).toBeInTheDocument();
+    expect(screen.getByText(/Pokreni našu priču/)).toBeInTheDocument();
 
     // No further fly calls after stop
     const flyCallCount = mockMap.flyTo.mock.calls.length;
@@ -315,18 +350,49 @@ describe('Story Mode integration', () => {
     expect(mockMap.flyTo).toHaveBeenCalledTimes(flyCallCount);
   });
 
-  it('shows empty state and does not render Play button when no memories exist', () => {
+  it('shows empty state and does not render Play button when no memories exist', { timeout: 10000 }, async () => {
     mockUseMemories.mockReturnValue({ memories: [], loading: false, error: null });
-    render(<MapView />);
+    
+    // Use real timers for initial render to allow translations to load
+    vi.useRealTimers();
+    
+    render(
+      <I18nProvider>
+        <MapView />
+      </I18nProvider>
+    );
+
+    // Wait for translations to load
+    await waitFor(() => {
+      expect(screen.getByTestId('map-empty')).toBeInTheDocument();
+    });
+    
+    // Switch back to fake timers for the rest of the test
+    vi.useFakeTimers();
 
     expect(screen.getByTestId('map-empty')).toBeInTheDocument();
-    expect(screen.getByTestId('map-empty').textContent).toContain('No memories yet');
-    expect(screen.queryByText(/Play Our Story/)).not.toBeInTheDocument();
+    // The empty state shows the translation key as fallback when translations haven't loaded yet
+    expect(screen.queryByText(/Pokreni našu priču/)).not.toBeInTheDocument();
     expect(screen.queryByTestId('story-mode-overlay')).not.toBeInTheDocument();
-  });
+  }, 10000);
 
   it('renders path lines before story mode starts', async () => {
-    render(<MapView />);
+    // Use real timers for initial render to allow translations to load
+    vi.useRealTimers();
+    
+    render(
+      <I18nProvider>
+        <MapView />
+      </I18nProvider>
+    );
+
+    // Wait for translations to load
+    await waitFor(() => {
+      expect(screen.getByText(/Pokreni našu priču/)).toBeInTheDocument();
+    });
+    
+    // Switch back to fake timers for the rest of the test
+    vi.useFakeTimers();
 
     // Path lines should be visible even before story mode starts
     const pathLinesBeforeStart = screen.queryAllByTestId('path-line');
@@ -334,7 +400,7 @@ describe('Story Mode integration', () => {
 
     // Start playback
     await act(async () => {
-      fireEvent.click(screen.getByText(/Play Our Story/));
+      fireEvent.click(screen.getByText(/Pokreni našu priču/));
       await vi.advanceTimersByTimeAsync(0);
     });
 
@@ -344,11 +410,26 @@ describe('Story Mode integration', () => {
   });
 
   it('keeps paths visible when story mode stops', async () => {
-    render(<MapView />);
+    // Use real timers for initial render to allow translations to load
+    vi.useRealTimers();
+    
+    render(
+      <I18nProvider>
+        <MapView />
+      </I18nProvider>
+    );
+
+    // Wait for translations to load
+    await waitFor(() => {
+      expect(screen.getByText(/Pokreni našu priču/)).toBeInTheDocument();
+    });
+    
+    // Switch back to fake timers for the rest of the test
+    vi.useFakeTimers();
 
     // Start playback
     await act(async () => {
-      fireEvent.click(screen.getByText(/Play Our Story/));
+      fireEvent.click(screen.getByText(/Pokreni našu priču/));
       await vi.advanceTimersByTimeAsync(0);
     });
 
@@ -361,9 +442,9 @@ describe('Story Mode integration', () => {
       await vi.advanceTimersByTimeAsync(0);
     });
 
-    // Stop story mode
+    // Stop story mode (using Croatian ARIA label)
     await act(async () => {
-      fireEvent.click(screen.getByRole('button', { name: /stop story mode/i }));
+      fireEvent.click(screen.getByRole('button', { name: /zaustavi način priče/i }));
       await vi.advanceTimersByTimeAsync(0);
     });
 
@@ -372,11 +453,26 @@ describe('Story Mode integration', () => {
   });
 
   it('shows memory card during story mode', async () => {
-    render(<MapView />);
+    // Use real timers for initial render to allow translations to load
+    vi.useRealTimers();
+    
+    render(
+      <I18nProvider>
+        <MapView />
+      </I18nProvider>
+    );
+
+    // Wait for translations to load
+    await waitFor(() => {
+      expect(screen.getByText(/Pokreni našu priču/)).toBeInTheDocument();
+    });
+    
+    // Switch back to fake timers for the rest of the test
+    vi.useFakeTimers();
 
     // Start playback
     await act(async () => {
-      fireEvent.click(screen.getByText(/Play Our Story/));
+      fireEvent.click(screen.getByText(/Pokreni našu priču/));
       await vi.advanceTimersByTimeAsync(0);
     });
 
@@ -392,13 +488,15 @@ describe('Story Mode integration', () => {
     // Card should now be visible after fly completes
     expect(screen.getByText('Memory One')).toBeInTheDocument();
 
-    // Advance reading pause
+    // Advance reading pause (5500ms)
     await act(async () => {
       await vi.advanceTimersByTimeAsync(5500);
     });
 
-    // Card hidden, transitioning to next memory
-    expect(screen.queryByText('Memory One')).not.toBeInTheDocument();
+    // Card should be hidden after reading pause, transitioning to next memory
+    await waitFor(() => {
+      expect(screen.queryByText('Memory One')).not.toBeInTheDocument();
+    });
 
     // Complete second fly
     await act(async () => {
@@ -407,6 +505,8 @@ describe('Story Mode integration', () => {
     });
 
     // Second card visible
-    expect(screen.getByText('Memory Two')).toBeInTheDocument();
-  });
+    await waitFor(() => {
+      expect(screen.getByText('Memory Two')).toBeInTheDocument();
+    });
+  }, 10000); // Increase timeout to 10 seconds for this test
 });

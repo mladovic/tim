@@ -3,6 +3,7 @@ import { MapContainer, TileLayer, ZoomControl } from 'react-leaflet';
 import { useMemories } from '../hooks/useMemories';
 import { useStoryMode } from '../hooks/useStoryMode';
 import { useBackgroundMusic } from '../hooks/useBackgroundMusic';
+import { useTranslation } from '../i18n/useTranslation';
 import type { Memory } from '../types';
 import type { MapControllerHandle } from './MapController';
 import { MapController } from './MapController';
@@ -12,6 +13,7 @@ import { LogoOverlay } from './LogoOverlay';
 import { PlayStoryButton } from './PlayStoryButton';
 import { StoryModeOverlay } from './StoryModeOverlay';
 import { StoryPathLayer } from './StoryPathLayer';
+import { LanguageSelector } from '../i18n/LanguageSelector';
 
 const TILE_URL = 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png';
 const TILE_ATTRIBUTION =
@@ -22,6 +24,7 @@ const DEFAULT_ZOOM = 3;
 
 export function MapView() {
   const { memories, loading, error } = useMemories();
+  const { t } = useTranslation();
   const [selectedMemory, setSelectedMemory] = useState<Memory | null>(null);
   const [isCardOpen, setIsCardOpen] = useState(false);
   const [mapHandle, setMapHandle] = useState<MapControllerHandle | null>(null);
@@ -114,10 +117,14 @@ export function MapView() {
         )}
       </div>
 
+      <div className="absolute top-4 right-4 z-[1000] pointer-events-auto">
+        <LanguageSelector />
+      </div>
+
       {loading && (
         <div data-testid="map-loading" className="absolute inset-0 z-[1000] flex items-center justify-center">
           <div className="rounded-xl bg-white/90 px-6 py-4 shadow-lg backdrop-blur-sm">
-            <p className="text-body text-lg">Loading memories...</p>
+            <p className="text-body text-lg">{t('common.loading')}</p>
           </div>
         </div>
       )}
@@ -133,7 +140,7 @@ export function MapView() {
       {!loading && !error && memories.length === 0 && (
         <div data-testid="map-empty" className="absolute inset-0 z-[1000] flex items-center justify-center">
           <div className="rounded-xl bg-white/90 px-6 py-4 shadow-lg backdrop-blur-sm">
-            <p className="text-body/70 text-lg">No memories yet</p>
+            <p className="text-body/70 text-lg">{t('common.loading')}</p>
           </div>
         </div>
       )}

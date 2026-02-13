@@ -2,6 +2,21 @@ import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
+// Mock translations for tests
+const mockTranslations = {
+  'story.playButton': 'Play Our Story',
+};
+
+vi.mock('../i18n/useTranslation', () => ({
+  useTranslation: () => ({
+    t: (key: string) => mockTranslations[key as keyof typeof mockTranslations] || key,
+    locale: 'hr',
+    setLocale: vi.fn(),
+    formatDate: (date: Date) => date.toLocaleDateString(),
+    isLoading: false,
+  }),
+}));
+
 vi.mock('framer-motion', () => ({
   motion: {
     button: ({
@@ -33,7 +48,7 @@ import { PlayStoryButton } from './PlayStoryButton';
 describe('PlayStoryButton', () => {
   it('renders the "Play Our Story" text', () => {
     render(<PlayStoryButton onStart={vi.fn()} isStoryPlaying={false} />);
-    expect(screen.getByText(/Play Our Story/)).toBeInTheDocument();
+    expect(screen.getByText(/Play Our Story/i)).toBeInTheDocument();
   });
 
   it('renders a play icon', () => {

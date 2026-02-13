@@ -4,8 +4,10 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "npm run generate:i18n && vite",
     "build": "tsc -b && vite build",
+    "prebuild": "npm run generate:i18n",
+    "generate:i18n": "tsx scripts/generate-i18n-types.ts",
     "lint": "eslint .",
     "preview": "vite preview"
   },
@@ -32,6 +34,7 @@
     "eslint-plugin-react-refresh": "^0.4.24",
     "globals": "^16.5.0",
     "jsdom": "^28.0.0",
+    "tsx": "^4.19.2",
     "typescript": "~5.9.3",
     "typescript-eslint": "^8.48.0",
     "vite": "^7.3.1",

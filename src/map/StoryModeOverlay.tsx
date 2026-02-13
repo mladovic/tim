@@ -1,4 +1,5 @@
 import { AnimatePresence, motion } from 'framer-motion';
+import { useTranslation } from '../i18n/useTranslation';
 
 export interface StoryModeOverlayProps {
   isPlaying: boolean;
@@ -13,6 +14,13 @@ export function StoryModeOverlay({
   totalMemories,
   onStop,
 }: StoryModeOverlayProps) {
+  const { t } = useTranslation();
+  
+  // Format the progress label with current and total values
+  const progressText = t('story.memoryOf')
+    .replace('{current}', String(currentIndex + 1))
+    .replace('{total}', String(totalMemories));
+  
   return (
     <AnimatePresence>
       {isPlaying && (
@@ -28,11 +36,11 @@ export function StoryModeOverlay({
             data-testid="story-progress"
             className="font-sans text-sm text-white drop-shadow-md"
           >
-            Memory {currentIndex + 1} of {totalMemories}
+            {progressText}
           </p>
           <button
             onClick={onStop}
-            aria-label="Stop Story Mode"
+            aria-label={t('story.stopButton')}
             className="pointer-events-auto min-h-[44px] min-w-[44px] flex items-center justify-center rounded-full bg-black/50 backdrop-blur-sm text-white shadow-lg hover:bg-black/70 transition-colors"
           >
             <span className="text-lg">✕</span>

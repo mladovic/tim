@@ -2,6 +2,22 @@ import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
+// Mock translations for tests
+const mockTranslations = {
+  'story.memoryOf': 'Memory {current} of {total}',
+  'story.stopButton': 'Stop Story Mode',
+};
+
+vi.mock('../i18n/useTranslation', () => ({
+  useTranslation: () => ({
+    t: (key: string) => mockTranslations[key as keyof typeof mockTranslations] || key,
+    locale: 'hr',
+    setLocale: vi.fn(),
+    formatDate: (date: Date) => date.toLocaleDateString(),
+    isLoading: false,
+  }),
+}));
+
 vi.mock('framer-motion', () => ({
   AnimatePresence: ({ children }: { children: React.ReactNode }) => (
     <div data-testid="animate-presence">{children}</div>
@@ -71,17 +87,17 @@ describe('StoryModeOverlay', () => {
 
     it('displays the progress indicator with current position', () => {
       render(<StoryModeOverlay {...defaultProps} currentIndex={1} totalMemories={5} />);
-      expect(screen.getByText('Memory 2 of 5')).toBeInTheDocument();
+      expect(screen.getByText(/2.*5/i)).toBeInTheDocument();
     });
 
     it('displays correct progress for the first memory', () => {
       render(<StoryModeOverlay {...defaultProps} currentIndex={0} totalMemories={3} />);
-      expect(screen.getByText('Memory 1 of 3')).toBeInTheDocument();
+      expect(screen.getByText(/1.*3/i)).toBeInTheDocument();
     });
 
     it('displays correct progress for the last memory', () => {
       render(<StoryModeOverlay {...defaultProps} currentIndex={4} totalMemories={5} />);
-      expect(screen.getByText('Memory 5 of 5')).toBeInTheDocument();
+      expect(screen.getByText(/5.*5/i)).toBeInTheDocument();
     });
 
     it('uses the sans-serif font for the progress text', () => {

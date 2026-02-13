@@ -1,0 +1,39 @@
+{
+  "auth": {
+    "title": "The Dream Team",
+    "subtitle": "feat. Marin",
+    "question": "Kako se zove naš tim?",
+    "placeholder": "Unesite tajnu frazu...",
+    "unlockButton": "Otključaj",
+    "error": "Netočna fraza. Pokušajte ponovno."
+  },
+  "map": {
+    "zoomIn": "Uvećaj",
+    "zoomOut": "Umanji",
+    "resetView": "Resetiraj pogled"
+  },
+  "memory": {
+    "closeButton": "Zatvori",
+    "videoLoadError": "Nije moguće učitati video. Video datoteka možda nije dostupna ili je u nepodržanom formatu.",
+    "videoNotSupported": "Vaš preglednik ne podržava reprodukciju videa.",
+    "loading": "Učitavanje..."
+  },
+  "story": {
+    "playButton": "Pokreni našu priču",
+    "stopButton": "Zaustavi način priče",
+    "progressLabel": "Uspomena {current} od {total}",
+    "memoryOf": "Uspomena {current} od {total}"
+  },
+  "common": {
+    "loading": "Učitavanje...",
+    "error": "Greška",
+    "close": "Zatvori",
+    "switchLanguage": "Promijeni jezik"
+  },
+  "language": {
+    "croatian": "Hrvatski",
+    "english": "Engleski",
+    "currentLanguage": "Trenutni jezik: {language}",
+    "switchTo": "Prebaci na {language}"
+  }
+}

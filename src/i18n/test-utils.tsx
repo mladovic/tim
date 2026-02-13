@@ -1,22 +1,9 @@
-import '@testing-library/jest-dom/vitest';
-import { vi, beforeEach, afterEach } from 'vitest';
+import { ReactNode } from 'react';
+import { I18nProvider } from './I18nContext';
+import { vi } from 'vitest';
 
-Object.defineProperty(window, 'matchMedia', {
-  writable: true,
-  value: (query: string) => ({
-    matches: false,
-    media: query,
-    onchange: null,
-    addListener: () => {},
-    removeListener: () => {},
-    addEventListener: () => {},
-    removeEventListener: () => {},
-    dispatchEvent: () => false,
-  }),
-});
-
-// Mock translation data for all tests
-const mockTranslations = {
+// Mock translation data for tests
+export const mockTranslations = {
   hr: {
     auth: {
       title: 'The Dream Team',
@@ -97,11 +84,10 @@ const mockTranslations = {
   },
 };
 
-// Setup fetch mock for translation files before each test
-beforeEach(() => {
-  // Clear localStorage before each test to ensure clean state
-  localStorage.clear();
-  
+/**
+ * Setup fetch mock for translation files in tests
+ */
+export function setupTranslationMocks() {
   global.fetch = vi.fn((url: string | URL | Request) => {
     const urlString = typeof url === 'string' ? url : url.toString();
     
@@ -119,12 +105,13 @@ beforeEach(() => {
       } as Response);
     }
     
-    // For other URLs, return a rejected promise
     return Promise.reject(new Error(`Unexpected fetch: ${urlString}`));
   });
-});
+}
 
-afterEach(() => {
-  // Clean up localStorage after each test
-  localStorage.clear();
-});
+/**
+ * Wrapper component for testing with I18nProvider
+ */
+export function I18nTestWrapper({ children }: { children: ReactNode }) {
+  return <I18nProvider>{children}</I18nProvider>;
+}

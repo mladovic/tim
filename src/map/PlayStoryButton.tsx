@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import { useTranslation } from '../i18n/useTranslation';
 
 export interface PlayStoryButtonProps {
   onStart: () => void;
@@ -6,6 +7,8 @@ export interface PlayStoryButtonProps {
 }
 
 export function PlayStoryButton({ onStart, isStoryPlaying }: PlayStoryButtonProps) {
+  const { t } = useTranslation();
+  
   return (
     <motion.button
       onClick={onStart}
@@ -15,7 +18,7 @@ export function PlayStoryButton({ onStart, isStoryPlaying }: PlayStoryButtonProp
       className={`bg-primary text-white rounded-full px-5 py-2.5 font-sans font-medium text-sm shadow-lg min-h-[44px] min-w-[44px] flex items-center gap-2 hover:bg-primary/90 transition-colors ${isStoryPlaying ? 'pointer-events-none' : ''}`}
     >
       <span>▶</span>
-      <span>Play Our Story</span>
+      <span>{t('story.playButton')}</span>
     </motion.button>
   );
 }
