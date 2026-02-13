@@ -13,6 +13,7 @@ export interface StoryPathLayerProps {
 }
 
 const AIRPLANE_ANIMATION_DURATION = 2; // seconds
+const DEFAULT_ZOOM_LEVEL = 13; // Default zoom level when memory doesn't specify one
 
 /**
  * StoryPathLayer manages the visual path connections and airplane animation
@@ -24,10 +25,11 @@ export function StoryPathLayer({
   currentIndex,
   memories,
   mapHandle,
-}: StoryPathLayerProps): JSX.Element | null {
+}: StoryPathLayerProps) {
   const [isAnimating, setIsAnimating] = useState(false);
   const [currentPath, setCurrentPath] = useState<[number, number][] | null>(null);
   const previousIndexRef = useRef<number>(0);
+  const destinationMemoryRef = useRef<Memory | null>(null);
 
   // Detect transitions and start airplane animation
   useEffect(() => {
@@ -35,6 +37,7 @@ export function StoryPathLayer({
     if (!isPlaying || !mapHandle || memories.length < 2) {
       setIsAnimating(false);
       setCurrentPath(null);
+      destinationMemoryRef.current = null;
       return;
     }
 
@@ -54,6 +57,7 @@ export function StoryPathLayer({
 
         setCurrentPath(path);
         setIsAnimating(true);
+        destinationMemoryRef.current = toMemory;
       }
     }
 
@@ -74,6 +78,20 @@ export function StoryPathLayer({
     
     if (mapHandle) {
       mapHandle.stopFollowing();
+      
+      // Trigger zoom transition to destination memory's zoom level
+      const destinationMemory = destinationMemoryRef.current;
+      if (destinationMemory) {
+        const zoomLevel = destinationMemory.zoomLevel ?? DEFAULT_ZOOM_LEVEL;
+        mapHandle.flyToMemory(
+          destinationMemory.lat,
+          destinationMemory.lng,
+          zoomLevel,
+          1 // Short duration for zoom transition
+        );
+      }
+      
+      destinationMemoryRef.current = null;
     }
   };
 
@@ -83,6 +101,7 @@ export function StoryPathLayer({
       setIsAnimating(false);
       setCurrentPath(null);
       previousIndexRef.current = 0;
+      destinationMemoryRef.current = null;
       
       if (mapHandle) {
         mapHandle.stopFollowing();
@@ -99,18 +118,13 @@ export function StoryPathLayer({
     };
   }, [mapHandle]);
 
-  // Don't render anything if story mode is not active
-  if (!isPlaying) {
-    return null;
-  }
-
   return (
     <>
-      {/* Render path lines connecting all memories */}
+      {/* Render path lines connecting all memories - always visible */}
       <PathLines memories={memories} currentIndex={currentIndex} />
 
-      {/* Render airplane marker during transitions */}
-      {isAnimating && currentPath && (
+      {/* Render airplane marker during transitions - only when story mode is active */}
+      {isPlaying && isAnimating && currentPath && (
         <AirplaneMarker
           path={currentPath}
           isAnimating={isAnimating}

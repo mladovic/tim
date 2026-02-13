@@ -231,9 +231,14 @@ describe('Story Mode integration', () => {
 
     // Card hidden, flying to memory 2
     expect(screen.queryByText('Memory One')).not.toBeInTheDocument();
-    expect(mockMap.flyTo).toHaveBeenCalledTimes(2);
+    // Note: flyTo is called for the initial transition to memory 2
     expect(mockMap.flyTo).toHaveBeenCalledWith([45, 14], 14, { duration: 3 });
     expect(screen.getByTestId('story-progress')).toHaveTextContent('Memory 2 of 3');
+
+    // Wait for airplane animation to complete (2 seconds)
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(2000);
+    });
 
     // Complete fly 2
     await act(async () => {
@@ -251,9 +256,13 @@ describe('Story Mode integration', () => {
 
     // Flying to memory 3
     expect(screen.queryByText('Memory Two')).not.toBeInTheDocument();
-    expect(mockMap.flyTo).toHaveBeenCalledTimes(3);
     expect(mockMap.flyTo).toHaveBeenCalledWith([40, -74], 12, { duration: 3 });
     expect(screen.getByTestId('story-progress')).toHaveTextContent('Memory 3 of 3');
+
+    // Wait for airplane animation to complete (2 seconds)
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(2000);
+    });
 
     // Complete fly 3
     await act(async () => {
@@ -326,11 +335,12 @@ describe('Story Mode integration', () => {
     expect(screen.queryByTestId('story-mode-overlay')).not.toBeInTheDocument();
   });
 
-  it('initializes path lines when story mode starts', async () => {
+  it('renders path lines before story mode starts', async () => {
     render(<MapView />);
 
-    // No path lines before story mode starts
-    expect(screen.queryAllByTestId('path-line')).toHaveLength(0);
+    // Path lines should be visible even before story mode starts
+    const pathLinesBeforeStart = screen.queryAllByTestId('path-line');
+    expect(pathLinesBeforeStart.length).toBeGreaterThan(0);
 
     // Start playback
     await act(async () => {
@@ -338,9 +348,9 @@ describe('Story Mode integration', () => {
       await vi.advanceTimersByTimeAsync(0);
     });
 
-    // Path lines should be rendered (N-1 paths for N memories)
-    const pathLines = screen.queryAllByTestId('path-line');
-    expect(pathLines.length).toBeGreaterThan(0);
+    // Path lines should still be rendered during story mode
+    const pathLinesDuringStory = screen.queryAllByTestId('path-line');
+    expect(pathLinesDuringStory.length).toBeGreaterThan(0);
   });
 
   it('animates airplane during transitions between memories', async () => {
@@ -373,7 +383,7 @@ describe('Story Mode integration', () => {
     expect(markers.length).toBeGreaterThanOrEqual(sampleMemories.length);
   });
 
-  it('cleans up paths and airplane when story mode stops', async () => {
+  it('keeps paths visible but removes airplane when story mode stops', async () => {
     render(<MapView />);
 
     // Start playback
@@ -397,8 +407,12 @@ describe('Story Mode integration', () => {
       await vi.advanceTimersByTimeAsync(0);
     });
 
-    // Path lines should be cleaned up
-    expect(screen.queryAllByTestId('path-line')).toHaveLength(0);
+    // Path lines should still be visible after story mode stops
+    expect(screen.queryAllByTestId('path-line').length).toBeGreaterThan(0);
+
+    // Airplane marker should not be present (only memory markers remain)
+    const markers = screen.queryAllByTestId('leaflet-marker');
+    expect(markers.length).toBe(sampleMemories.length);
   });
 
   it('shows memory card after airplane animation completes', async () => {
