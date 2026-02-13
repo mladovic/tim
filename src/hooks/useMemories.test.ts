@@ -345,7 +345,7 @@ describe('useMemories', () => {
       // Use a never-resolving fetch to keep the request in-flight
       let capturedSignal: AbortSignal | undefined;
       vi.stubGlobal('fetch', vi.fn().mockImplementation((_url: string, init?: RequestInit) => {
-        capturedSignal = init?.signal;
+        capturedSignal = init?.signal ?? undefined;
         return new Promise(() => {}); // never resolves
       }));
 

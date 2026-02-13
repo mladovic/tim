@@ -374,7 +374,7 @@ describe('Story Mode integration', () => {
     // The empty state shows the translation key as fallback when translations haven't loaded yet
     expect(screen.queryByText(/Pokreni našu priču/)).not.toBeInTheDocument();
     expect(screen.queryByTestId('story-mode-overlay')).not.toBeInTheDocument();
-  }, 10000);
+  });
 
   it('renders path lines before story mode starts', async () => {
     // Use real timers for initial render to allow translations to load

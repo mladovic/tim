@@ -57,8 +57,9 @@ describe('AuthGate', () => {
     vi.clearAllMocks();
     
     // Mock fetch for translation files
-    global.fetch = vi.fn((url: string) => {
-      const locale = url.includes('hr.json') ? 'hr' : 'en';
+    globalThis.fetch = vi.fn((url: string | URL | Request) => {
+      const urlString = typeof url === 'string' ? url : url.toString();
+      const locale = urlString.includes('hr.json') ? 'hr' : 'en';
       return Promise.resolve({
         ok: true,
         json: () => Promise.resolve(mockTranslations[locale])

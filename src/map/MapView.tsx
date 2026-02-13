@@ -60,11 +60,11 @@ export function MapView() {
     flyToMemory: mapHandle?.flyToMemory ?? null,
     showCard,
     hideCard,
-    onTransitionStart: (fromIndex, toIndex) => {
+    onTransitionStart: (_fromIndex, _toIndex) => {
       // Transition callbacks are handled by StoryPathLayer
       // This allows the airplane animation to coordinate with story mode
     },
-    onTransitionComplete: (index) => {
+    onTransitionComplete: (_index) => {
       // Transition complete callback
       // StoryPathLayer uses this to know when to stop following
     },

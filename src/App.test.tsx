@@ -4,8 +4,9 @@ import App from './App';
 
 // Mock the translation files
 beforeEach(() => {
-  global.fetch = vi.fn((url: string) => {
-    if (url.includes('/locales/hr.json')) {
+  globalThis.fetch = vi.fn((url: string | URL | Request) => {
+    const urlString = typeof url === 'string' ? url : url.toString();
+    if (urlString.includes('/locales/hr.json')) {
       return Promise.resolve({
         ok: true,
         json: () => Promise.resolve({
@@ -26,7 +27,7 @@ describe('App with I18nProvider', () => {
     
     // Wait for translations to load
     await waitFor(() => {
-      expect(global.fetch).toHaveBeenCalledWith('/locales/hr.json');
+      expect(globalThis.fetch).toHaveBeenCalledWith('/locales/hr.json');
     });
   });
 

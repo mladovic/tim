@@ -102,7 +102,7 @@ beforeEach(() => {
   // Clear localStorage before each test to ensure clean state
   localStorage.clear();
   
-  global.fetch = vi.fn((url: string | URL | Request) => {
+  globalThis.fetch = vi.fn((url: string | URL | Request) => {
     const urlString = typeof url === 'string' ? url : url.toString();
     
     if (urlString.includes('/locales/hr.json')) {

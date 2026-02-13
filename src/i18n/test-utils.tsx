@@ -1,4 +1,4 @@
-import { ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import { I18nProvider } from './I18nContext';
 import { vi } from 'vitest';
 
@@ -88,7 +88,7 @@ export const mockTranslations = {
  * Setup fetch mock for translation files in tests
  */
 export function setupTranslationMocks() {
-  global.fetch = vi.fn((url: string | URL | Request) => {
+  globalThis.fetch = vi.fn((url: string | URL | Request) => {
     const urlString = typeof url === 'string' ? url : url.toString();
     
     if (urlString.includes('/locales/hr.json')) {

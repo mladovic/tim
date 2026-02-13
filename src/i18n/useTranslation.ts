@@ -1,5 +1,5 @@
 import { useI18n } from './I18nContext';
-import type { Locale } from '../types/i18n';
+
 
 /**
  * Convenience hook for accessing translation functionality in components.

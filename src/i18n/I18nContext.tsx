@@ -1,7 +1,7 @@
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import type { ReactNode } from 'react';
 import type { Locale, TranslationMap, I18nContextState } from '../types/i18n';
-import type { TranslationKey } from './types';
+
 
 const I18N_STORAGE_KEY = 'memoryMapLanguage';
 const DEFAULT_LOCALE: Locale = 'hr';

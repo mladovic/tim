@@ -35,8 +35,9 @@ describe('I18nContext', () => {
     vi.clearAllMocks();
     
     // Mock fetch
-    global.fetch = vi.fn((url: string) => {
-      const locale = url.includes('hr.json') ? 'hr' : 'en';
+    globalThis.fetch = vi.fn((url: string | URL | Request) => {
+      const urlString = typeof url === 'string' ? url : url.toString();
+      const locale = urlString.includes('hr.json') ? 'hr' : 'en';
       return Promise.resolve({
         ok: true,
         json: () => Promise.resolve(mockTranslations[locale])
@@ -137,7 +138,7 @@ describe('I18nContext', () => {
   });
 
   it('handles translation loading errors gracefully', async () => {
-    global.fetch = vi.fn(() => 
+    globalThis.fetch = vi.fn(() => 
       Promise.resolve({
         ok: false,
         status: 404
@@ -157,7 +158,7 @@ describe('I18nContext', () => {
     
     await waitFor(() => expect(result.current.isLoading).toBe(false));
     
-    const fetchCallCount = (global.fetch as any).mock.calls.length;
+    const fetchCallCount = (globalThis.fetch as any).mock.calls.length;
     
     // Switch to English
     result.current.setLocale('en');
@@ -168,7 +169,7 @@ describe('I18nContext', () => {
     await waitFor(() => expect(result.current.isLoading).toBe(false));
     
     // Should have only 2 fetch calls (hr and en), not 3
-    expect((global.fetch as any).mock.calls.length).toBe(fetchCallCount + 1);
+    expect((globalThis.fetch as any).mock.calls.length).toBe(fetchCallCount + 1);
   });
 
   it('throws error when useI18n is used outside provider', () => {

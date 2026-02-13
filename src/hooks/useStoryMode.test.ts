@@ -33,17 +33,17 @@ describe('useStoryMode', () => {
     vi.useRealTimers();
   });
 
-  function renderStoryMode(overrides: Record<string, unknown> = {}) {
+  function renderStoryMode(overrides: Partial<Parameters<typeof useStoryMode>[0]> = {}) {
     return renderHook(() =>
       useStoryMode({
         memories: sampleMemories,
-        flyToMemory,
-        showCard,
-        hideCard,
-        onPlaybackStart,
-        onPlaybackEnd,
-        onTransitionStart,
-        onTransitionComplete,
+        flyToMemory: flyToMemory as any,
+        showCard: showCard as any,
+        hideCard: hideCard as any,
+        onPlaybackStart: onPlaybackStart as any,
+        onPlaybackEnd: onPlaybackEnd as any,
+        onTransitionStart: onTransitionStart as any,
+        onTransitionComplete: onTransitionComplete as any,
         ...overrides,
       }),
     );

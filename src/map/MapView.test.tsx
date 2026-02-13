@@ -1,9 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render as rtlRender, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { useMemories } from '../hooks/useMemories';
 import { useStoryMode } from '../hooks/useStoryMode';
 import type { Memory } from '../types';
+import { I18nTestWrapper } from '../i18n/test-utils';
 
 // Mock translations for tests
 const mockTranslations = {
@@ -129,7 +130,7 @@ import { MapView } from './MapView';
 
 // Helper to render with I18nProvider
 function render(ui: React.ReactElement) {
-  return render(<I18nProvider>{ui}</I18nProvider>);
+  return rtlRender(<I18nTestWrapper>{ui}</I18nTestWrapper>);
 }
 
 const sampleMemories: Memory[] = [
