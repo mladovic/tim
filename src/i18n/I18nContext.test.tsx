@@ -7,7 +7,7 @@ import type { ReactNode } from 'react';
 const mockTranslations = {
   hr: {
     auth: {
-      title: 'The Dream Team',
+      title: 'Savršeni Tim',
       error: 'Netočna fraza. Pokušajte ponovno.'
     },
     common: {
@@ -16,7 +16,7 @@ const mockTranslations = {
   },
   en: {
     auth: {
-      title: 'The Dream Team',
+      title: 'The Perfect Team',
       error: 'Incorrect phrase. Please try again.'
     },
     common: {
@@ -58,7 +58,7 @@ describe('I18nContext', () => {
     
     await waitFor(() => expect(result.current.isLoading).toBe(false));
     
-    expect(result.current.t('auth.title')).toBe('The Dream Team');
+    expect(result.current.t('auth.title')).toBe('Savršeni Tim');
     expect(result.current.t('auth.error')).toBe('Netočna fraza. Pokušajte ponovno.');
   });
 

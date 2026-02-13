@@ -9,9 +9,9 @@ import { I18nProvider } from '../i18n/I18nContext';
 const mockTranslations = {
   hr: {
     auth: {
-      title: 'The Dream Team',
-      subtitle: 'feat. Marin',
-      question: 'Kako se zove naš tim?',
+      title: 'Savršeni Tim',
+      subtitle: 'feat. Tea & Marin',
+      question: 'Tko smo mi?',
       placeholder: 'Unesite tajnu frazu...',
       unlockButton: 'Otključaj',
       error: 'Netočna fraza. Pokušajte ponovno.'
@@ -25,9 +25,9 @@ const mockTranslations = {
   },
   en: {
     auth: {
-      title: 'The Dream Team',
-      subtitle: 'feat. Marin',
-      question: 'What is the name of our team?',
+      title: 'The Perfect Team',
+      subtitle: 'feat. Tea & Marin',
+      question: 'Who are we?',
       placeholder: 'Enter the secret phrase...',
       unlockButton: 'Unlock',
       error: 'Incorrect phrase. Please try again.'
@@ -71,7 +71,7 @@ describe('AuthGate', () => {
     renderWithAuth();
     const heading = await screen.findByRole('heading', { level: 1 });
     expect(heading).toBeInTheDocument();
-    expect(heading.textContent).toBe('The Dream Team');
+    expect(heading.textContent).toBe('Savršeni Tim');
   });
 
   it('displays "feat. Marin" subtitle', async () => {

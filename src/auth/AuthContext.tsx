@@ -3,7 +3,7 @@ import type { ReactNode } from 'react';
 
 const AUTH_STORAGE_KEY = 'dtm-auth';
 const AUTH_TOKEN_VALUE = 'authenticated';
-const TARGET_PHRASE = 'the dream team';
+const TARGET_PHRASE = 'tea i marin';
 
 interface AuthState {
   isAuthenticated: boolean;

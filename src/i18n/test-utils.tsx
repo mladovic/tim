@@ -6,9 +6,9 @@ import { vi } from 'vitest';
 export const mockTranslations = {
   hr: {
     auth: {
-      title: 'The Dream Team',
-      subtitle: 'feat. Marin',
-      question: 'Kako se zove naš tim?',
+      title: 'Savršeni Tim',
+      subtitle: 'feat. Tea & Marin',
+      question: 'Tko smo mi?',
       placeholder: 'Unesite tajnu frazu...',
       unlockButton: 'Otključaj',
       error: 'Netočna fraza. Pokušajte ponovno.',
@@ -45,9 +45,9 @@ export const mockTranslations = {
   },
   en: {
     auth: {
-      title: 'The Dream Team',
-      subtitle: 'feat. Marin',
-      question: 'What is the name of our team?',
+      title: 'The Perfect Team',
+      subtitle: 'feat. Tea & Marin',
+      question: 'Who are we?',
       placeholder: 'Enter the secret phrase...',
       unlockButton: 'Unlock',
       error: 'Incorrect phrase. Please try again.',

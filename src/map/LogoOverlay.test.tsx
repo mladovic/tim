@@ -29,9 +29,9 @@ vi.mock('framer-motion', () => ({
 import { LogoOverlay } from './LogoOverlay';
 
 describe('LogoOverlay', () => {
-  it('renders "The Dream Team" text', () => {
+  it('renders "The Perfect Team" text', () => {
     render(<LogoOverlay isStoryPlaying={false} />);
-    expect(screen.getByText(/The Dream/)).toBeInTheDocument();
+    expect(screen.getByText(/The Perfect Team/)).toBeInTheDocument();
   });
 
   it('renders the logo in the serif/display font', () => {

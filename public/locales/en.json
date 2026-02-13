@@ -1,8 +1,8 @@
 {
   "auth": {
-    "title": "The Dream Team",
-    "subtitle": "feat. Marin",
-    "question": "What is the name of our team?",
+    "title": "The Perfect Team",
+    "subtitle": "feat. Tea & Marin",
+    "question": "We are the perfect team because we are:",
     "placeholder": "Enter the secret phrase...",
     "unlockButton": "Unlock",
     "error": "Incorrect phrase. Please try again."

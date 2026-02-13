@@ -28,10 +28,10 @@ describe('AuthContext', () => {
   });
 
   describe('validatePhrase', () => {
-    it('returns true and authenticates for exact match "The Dream Team"', () => {
+    it('returns true and authenticates for exact match "Tea i Marin"', () => {
       const { result } = renderHook(() => useAuth(), { wrapper });
       act(() => {
-        const success = result.current.validatePhrase('The Dream Team');
+        const success = result.current.validatePhrase('Tea i Marin');
         expect(success).toBe(true);
       });
       expect(result.current.isAuthenticated).toBe(true);
@@ -39,28 +39,28 @@ describe('AuthContext', () => {
       expect(localStorage.getItem('dtm-auth')).toBe('authenticated');
     });
 
-    it('returns true for case variation "the dream team"', () => {
+    it('returns true for case variation "tea i marin"', () => {
       const { result } = renderHook(() => useAuth(), { wrapper });
       act(() => {
-        const success = result.current.validatePhrase('the dream team');
+        const success = result.current.validatePhrase('tea i marin');
         expect(success).toBe(true);
       });
       expect(result.current.isAuthenticated).toBe(true);
     });
 
-    it('returns true for case variation "THE DREAM TEAM"', () => {
+    it('returns true for case variation "TEA I MARIN"', () => {
       const { result } = renderHook(() => useAuth(), { wrapper });
       act(() => {
-        const success = result.current.validatePhrase('THE DREAM TEAM');
+        const success = result.current.validatePhrase('TEA I MARIN');
         expect(success).toBe(true);
       });
       expect(result.current.isAuthenticated).toBe(true);
     });
 
-    it('returns true for whitespace-padded input "  The Dream Team  "', () => {
+    it('returns true for whitespace-padded input "  Tea i Marin  "', () => {
       const { result } = renderHook(() => useAuth(), { wrapper });
       act(() => {
-        const success = result.current.validatePhrase('  The Dream Team  ');
+        const success = result.current.validatePhrase('  Tea i Marin  ');
         expect(success).toBe(true);
       });
       expect(result.current.isAuthenticated).toBe(true);
@@ -95,7 +95,7 @@ describe('AuthContext', () => {
       });
       expect(result.current.error).not.toBeNull();
       act(() => {
-        result.current.validatePhrase('The Dream Team');
+        result.current.validatePhrase('Tea i Marin');
       });
       expect(result.current.error).toBeNull();
       expect(result.current.isAuthenticated).toBe(true);
