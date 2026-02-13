@@ -2,6 +2,7 @@ import { useState, useCallback } from 'react';
 import { MapContainer, TileLayer, ZoomControl } from 'react-leaflet';
 import { useMemories } from '../hooks/useMemories';
 import { useStoryMode } from '../hooks/useStoryMode';
+import { useBackgroundMusic } from '../hooks/useBackgroundMusic';
 import type { Memory } from '../types';
 import type { MapControllerHandle } from './MapController';
 import { MapController } from './MapController';
@@ -64,6 +65,11 @@ export function MapView() {
       // Transition complete callback
       // StoryPathLayer uses this to know when to stop following
     },
+  });
+
+  useBackgroundMusic({
+    isPlaying,
+    audioUrl: '/music/fall-in-love.mp3',
   });
 
   const hasMemories = !loading && !error && memories.length > 0;
@@ -132,7 +138,7 @@ export function MapView() {
         </div>
       )}
 
-      <MemoryCard memory={selectedMemory} isOpen={isCardOpen} onClose={handleCardClose} />
+      <MemoryCard memory={selectedMemory} isOpen={isCardOpen} onClose={handleCardClose} isStoryMode={isPlaying} />
 
       <StoryModeOverlay
         isPlaying={isPlaying}

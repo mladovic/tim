@@ -9,6 +9,7 @@ export interface MemoryCardProps {
   isOpen: boolean;
   onClose: () => void;
   onVideoEnd?: () => void;
+  isStoryMode?: boolean;
 }
 
 const popupVariants = {
@@ -43,7 +44,7 @@ function useIsDesktop() {
 const SWIPE_OFFSET_THRESHOLD = 100;
 const SWIPE_VELOCITY_THRESHOLD = 500;
 
-export function MemoryCard({ memory, isOpen, onClose, onVideoEnd }: MemoryCardProps) {
+export function MemoryCard({ memory, isOpen, onClose, onVideoEnd, isStoryMode = false }: MemoryCardProps) {
   const isDesktop = useIsDesktop();
   const variant = isDesktop ? 'popup' : 'bottom-sheet';
   const variants = isDesktop ? popupVariants : bottomSheetVariants;
@@ -163,6 +164,7 @@ export function MemoryCard({ memory, isOpen, onClose, onVideoEnd }: MemoryCardPr
                         autoPlay
                         playsInline
                         preload="auto"
+                        muted={isStoryMode}
                         aria-label={`Video: ${memory.title}`}
                         onLoadStart={() => setIsVideoLoading(true)}
                         onLoadedMetadata={() => setIsVideoLoading(false)}

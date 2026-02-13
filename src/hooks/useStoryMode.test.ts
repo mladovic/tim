@@ -57,10 +57,10 @@ describe('useStoryMode', () => {
     });
   }
 
-  /** Advance past one reading pause (5500ms), flushing resulting micro-tasks */
+  /** Advance past one reading pause (7150ms), flushing resulting micro-tasks */
   async function advancePause() {
     await act(async () => {
-      await vi.advanceTimersByTimeAsync(5500);
+      await vi.advanceTimersByTimeAsync(7150);
     });
   }
 
@@ -319,7 +319,7 @@ describe('useStoryMode', () => {
 
       // Advance past what would be the reading pause
       await act(async () => {
-        await vi.advanceTimersByTimeAsync(5500);
+        await vi.advanceTimersByTimeAsync(7150);
       });
 
       expect(flyToMemory).not.toHaveBeenCalled();
@@ -578,7 +578,7 @@ describe('useStoryMode', () => {
       });
 
       await act(async () => {
-        await vi.advanceTimersByTimeAsync(5500);
+        await vi.advanceTimersByTimeAsync(7150);
       });
 
       expect(onTransitionStart).not.toHaveBeenCalled();

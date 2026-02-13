@@ -2,7 +2,7 @@ import { useState, useRef, useCallback, useEffect } from 'react';
 import type { Memory } from '../types';
 
 const DEFAULT_ZOOM = 13;
-const READING_PAUSE_MS = 5500;
+const READING_PAUSE_MS = 7150;
 const FLY_TIMEOUT_MS = 10000;
 
 export interface UseStoryModeParams {

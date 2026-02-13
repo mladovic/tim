@@ -4,8 +4,8 @@
     "date": "2025-05-15",
     "title": "Gdje sve počinje",
     "description": "Glazbeni kviz u kafiću Brick. Ja nisam znao ništa, ona je ubijala svako pitanje. Negdje između pogrešnih odgovora i njezinog osmjeha, sve je počelo.",
-    "lat": 45.8319,
-    "lng": 17.3839,
+    "lat": 45.8344,
+    "lng": 17.3840,
     "zoomLevel": 15
   },
   {
@@ -13,8 +13,8 @@
     "date": "2025-07-10",
     "title": "Šetnje s Merlinom",
     "description": "Puno kilometara, puno šetnji i jedan presretan pas. Merlin je znao prije nas da je ona dio obitelji.",
-    "lat": 45.8319,
-    "lng": 17.3839,
+    "lat": 45.8220,
+    "lng": 17.3933,
     "imageUrl": "/images/setnja_virovitica.jpg",
     "zoomLevel": 14
   },
@@ -43,8 +43,8 @@
     "date": "2025-11-18",
     "title": "Živjeli, kumovi!",
     "description": "Kuma i barjaktar! Ples, smijeh i mi dvoje usred svega toga. Noć u kojoj smo slavili tuđu ljubav, a svoju još jače osjetili.",
-    "lat": 45.8319,
-    "lng": 17.3839,
+    "lat": 45.8330,
+    "lng": 17.3843,
     "imageUrl": "/images/svatovi_park.jpg",
     "zoomLevel": 15
   },
