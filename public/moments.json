@@ -5,7 +5,7 @@
     "title": "Gdje sve počinje",
     "description": "Glazbeni kviz u kafiću Brick. Ja nisam znao ništa, ona je ubijala svako pitanje. Negdje između pogrešnih odgovora i njezinog osmjeha, sve je počelo.",
     "lat": 45.8344,
-    "lng": 17.3840,
+    "lng": 17.384,
     "zoomLevel": 15
   },
   {
@@ -13,7 +13,7 @@
     "date": "2025-07-10",
     "title": "Šetnje s Merlinom",
     "description": "Puno kilometara, puno šetnji i jedan presretan pas. Merlin je znao prije nas da je ona dio obitelji.",
-    "lat": 45.8220,
+    "lat": 45.822,
     "lng": 17.3933,
     "imageUrl": "/images/setnja_virovitica.jpg",
     "zoomLevel": 14
@@ -43,7 +43,7 @@
     "date": "2025-11-18",
     "title": "Živjeli, kumovi!",
     "description": "Kuma i barjaktar! Ples, smijeh i mi dvoje usred svega toga. Noć u kojoj smo slavili tuđu ljubav, a svoju još jače osjetili.",
-    "lat": 45.8330,
+    "lat": 45.833,
     "lng": 17.3843,
     "imageUrl": "/images/svatovi_park.jpg",
     "zoomLevel": 15
@@ -54,8 +54,28 @@
     "title": "Božićna bajka u parku",
     "description": "Vjenčanje njezine prijateljice u šumici, na Svetog Nikolu. Lampice, jelka i božićni ugođaj, kao da smo upali u najljepšu božićnu priču.",
     "lat": 45.8431,
-    "lng": 16.0880,
+    "lng": 16.088,
     "imageUrl": "/images/svatovi_sesvete.jpg",
+    "zoomLevel": 16
+  },
+  {
+    "id": "sesvete-svatovi-sumica",
+    "date": "2025-12-06",
+    "title": "Božićna bajka u parku",
+    "description": "Vjenčanje njezine prijateljice u šumici, na Svetog Nikolu. Lampice, jelka i božićni ugođaj, kao da smo upali u najljepšu božićnu priču.",
+    "lat": 45.8431,
+    "lng": 16.088,
+    "imageUrl": "/images/svatovi_sesvete.jpg",
+    "zoomLevel": 16
+  },
+  {
+    "id": "hotel-fiuggi",
+    "date": "2025-12-30",
+    "title": "Umorni od puta",
+    "description": "Putovali sto gladnih godina do Fiuggi-a. Našli odmor u zagrljaju.",
+    "lat": 41.795,
+    "lng": 13.2212,
+    "imageUrl": "/images/fiuggi.jpg",
     "zoomLevel": 16
   },
   {
